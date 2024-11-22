@@ -1,0 +1,590 @@
+{
+  "company": {
+    "Bose": {
+      "products": [
+        {
+          "connectivity": [
+            "Bluetooth"
+          ],
+          "price": 189.0,
+          "name": "Bose SoundLink Flex Bluetooth® Speaker",
+          "type": "Speaker System"
+        },
+        {
+          "connectivity": [
+            "Bluetooth"
+          ],
+          "price": 259.0,
+          "name": "Bose SoundLink Home Bluetooth Speaker",
+          "type": "Speaker System"
+        },
+        {
+          "price": 149.0,
+          "name": "Bose SoundLink Flex Portable Speaker (2nd Gen)",
+          "type": "Speaker System"
+        },
+        {
+          "price": 509.0,
+          "name": "Bose Smart Soundbar",
+          "type": "Soundbar"
+        },
+        {
+          "price": 279.0,
+          "name": "Bose TV Speaker",
+          "type": "Speaker System"
+        },
+        {
+          "connectivity": [
+            "Bluetooth"
+          ],
+          "price": 189.0,
+          "name": "Bose SoundLink Flex Bluetooth® Speaker",
+          "type": "Speaker System"
+        },
+        {
+          "connectivity": [
+            "Bluetooth"
+          ],
+          "price": 939.0,
+          "name": "Bose S1 Pro+ Portable Bluetooth® Speaker System",
+          "type": "Speaker System"
+        },
+        {
+          "price": 1539.0,
+          "name": "F1 Subwoofer",
+          "type": "Subwoofer"
+        },
+        {
+          "price": 449.0,
+          "name": "251® environmental speakers",
+          "type": "Speaker System"
+        },
+        {
+          "connectivity": [
+            "Bluetooth"
+          ],
+          "price": 129.0,
+          "name": "Bose SoundLink Micro Bluetooth® Speaker",
+          "type": "Speaker System"
+        },
+        {
+          "price": 649.0,
+          "name": "Virtually Invisible® 791 in-ceiling speakers II",
+          "type": "Speaker System"
+        },
+        {
+          "price": 949.0,
+          "name": "Bose Smart Ultra Soundbar",
+          "type": "Soundbar",
+          "speakerConfiguration": "4.4"
+        },
+        {
+          "connectivity": [
+            "Bluetooth"
+          ],
+          "price": 149.0,
+          "name": "Bose SoundLink Micro Bluetooth® Speaker",
+          "type": "Speaker System"
+        },
+        {
+          "connectivity": [
+            "Bluetooth"
+          ],
+          "price": 259.0,
+          "name": "Bose SoundLink Home Bluetooth Speaker",
+          "type": "Speaker System"
+        },
+        {
+          "price": 149.0,
+          "name": "Bose SoundLink Flex Portable Speaker (2nd Gen)",
+          "type": "Speaker System"
+        },
+        {
+          "price": 419.0,
+          "name": "Bose SoundLink Max Portable Speaker",
+          "type": "Speaker System"
+        },
+        {
+          "price": 509.0,
+          "name": "Bose Smart Soundbar",
+          "type": "Soundbar"
+        },
+        {
+          "price": 279.0,
+          "name": "Bose TV Speaker",
+          "type": "Speaker System"
+        },
+        {
+          "price": 949.0,
+          "name": "Bose Smart Ultra Soundbar",
+          "type": "Soundbar",
+          "speakerConfiguration": "4.4"
+        },
+        {
+          "price": 509.0,
+          "name": "Bose Smart Soundbar",
+          "type": "Soundbar"
+        },
+        {
+          "price": 279.0,
+          "name": "Bose TV Speaker",
+          "type": "Speaker System"
+        },
+        {
+          "price": 769.0,
+          "name": "Bose Surround Speakers 700",
+          "type": "Surround Speaker",
+          "speakerConfiguration": "4.4"
+        },
+        {
+          "connectivity": [
+            "Bluetooth"
+          ],
+          "price": 939.0,
+          "name": "Bose S1 Pro+ Portable Bluetooth® Speaker System",
+          "type": "Subwoofer"
+        },
+        {
+          "price": 1539.0,
+          "name": "F1 Subwoofer",
+          "type": "Subwoofer"
+        },
+        {
+          "price": 1499.0,
+          "name": "F1 Model 812 Flexible Array loudspeaker",
+          "type": "Speaker System",
+          "speakerConfiguration": "4.4"
+        },
+        {
+          "price": 419.0,
+          "name": "Bose Portable Smart Speaker",
+          "type": "Soundbar",
+          "speakerConfiguration": "4.1"
+        },
+        {
+          "price": 949.0,
+          "name": "Bose Smart Ultra Soundbar",
+          "type": "Soundbar",
+          "speakerConfiguration": "4.4"
+        },
+        {
+          "connectivity": [
+            "Bluetooth"
+          ],
+          "price": 189.0,
+          "name": "Bose SoundLink Flex Bluetooth® Speaker",
+          "type": "Speaker System"
+        },
+        {
+          "price": 949.0,
+          "name": "Bose Smart Ultra Soundbar",
+          "type": "Soundbar",
+          "speakerConfiguration": "4.4"
+        },
+        {
+          "price": 279.0,
+          "name": "Bose TV Speaker",
+          "type": "Speaker System"
+        }
+      ]
+    },
+    "Sony": {
+      "products": [
+        {
+          "name": "Speakers and Subwoofers",
+          "type": "Subwoofer"
+        },
+        {
+          "name": "Home Theatre \u0026 Soundbars",
+          "type": "Soundbar"
+        },
+        {
+          "name": "Home Theatre \u0026 Soundbars",
+          "type": "Soundbar"
+        },
+        {
+          "connectivity": [
+            "Bluetooth",
+            "Wi-Fi"
+          ],
+          "price": 899.99,
+          "name": "360 Spatial Sound Mapping 8K 7.2ch AV Receiver |STR-AN1000",
+          "audioTechnology": [
+            "Dolby Atmos",
+            "DTS:X",
+            "DTS"
+          ],
+          "type": "Soundbar",
+          "powerOutput": "145W",
+          "speakerConfiguration": "7.2"
+        },
+        {
+          "name": "Home Theatre \u0026 Soundbars",
+          "type": "Soundbar"
+        },
+        {
+          "connectivity": [
+            "Bluetooth",
+            "Wi-Fi"
+          ],
+          "price": 2499.99,
+          "name": "Soundbars",
+          "audioTechnology": [
+            "Dolby Atmos",
+            "DTS:X",
+            "DTS"
+          ],
+          "type": "Subwoofer",
+          "speakerConfiguration": "2.0"
+        },
+        {
+          "price": 2499.99,
+          "name": "360 Spatial Sound Mapping Dolby Atmos®/DTS:X® Home Theatre System | HT-A9",
+          "audioTechnology": [
+            "Dolby Atmos",
+            "DTS:X",
+            "DTS"
+          ],
+          "type": "Speaker System",
+          "speakerConfiguration": "4.3"
+        },
+        {
+          "price": 1299.99,
+          "name": "BRAVIA Theatre Bar 9 | Flagship Single Soundbar | 360 Spatial Sound Mapping | Dolby Atmos®/DTS:X®",
+          "audioTechnology": [
+            "Dolby Atmos",
+            "DTS:X",
+            "DTS"
+          ],
+          "type": "Soundbar"
+        },
+        {
+          "price": 999.99,
+          "name": "BRAVIA Theatre Bar 8 | Single Soundbar | 360 Spatial Sound Mapping | Dolby Atmos®/DTS:X®",
+          "audioTechnology": [
+            "Dolby Atmos",
+            "DTS:X",
+            "DTS"
+          ],
+          "type": "Soundbar"
+        },
+        {
+          "price": 1699.99,
+          "name": "360 Spatial Sound Mapping Dolby Atmos®/DTS:X® 7.1.2ch Soundbar | HT-A7000",
+          "audioTechnology": [
+            "Dolby Atmos",
+            "DTS:X",
+            "DTS"
+          ],
+          "type": "Soundbar",
+          "speakerConfiguration": "7.1.2"
+        },
+        {
+          "price": 1299.99,
+          "name": "360 Spatial Sound Mapping Dolby Atmos®/DTS:X® 5.1.2ch Soundbar | HT-A5000",
+          "audioTechnology": [
+            "Dolby Atmos",
+            "DTS:X",
+            "DTS"
+          ],
+          "type": "Soundbar",
+          "speakerConfiguration": "5.1.2"
+        },
+        {
+          "price": 599.99,
+          "name": "360 Spatial Sound Mapping Dolby Atmos® / DTS:X® 3.1ch Soundbar ┃ HT-A3000",
+          "audioTechnology": [
+            "Dolby Atmos",
+            "DTS:X",
+            "DTS"
+          ],
+          "type": "Soundbar",
+          "speakerConfiguration": "3.1"
+        },
+        {
+          "price": 699.99,
+          "name": "Dolby Atmos®/DTS:X® 3.1ch Soundbar | HT-S2000",
+          "audioTechnology": [
+            "Dolby Atmos",
+            "DTS:X",
+            "DTS"
+          ],
+          "type": "Subwoofer",
+          "speakerConfiguration": "3.1"
+        },
+        {
+          "name": "Home Theatre \u0026 Soundbars",
+          "type": "Soundbar"
+        },
+        {
+          "price": 199.99,
+          "name": "Home Theatre Speakers",
+          "type": "Subwoofer",
+          "powerOutput": "100W"
+        },
+        {
+          "price": 199.99,
+          "name": "Dolby® Atmos Enabled Speakers",
+          "type": "Subwoofer",
+          "powerOutput": "100W"
+        },
+        {
+          "price": 199.99,
+          "name": "Stereo Floor-Standing Speaker (Single)",
+          "type": "Speaker System"
+        },
+        {
+          "price": 199.99,
+          "name": "Stereo Bookshelf Speakers",
+          "type": "Speaker System",
+          "powerOutput": "100W"
+        },
+        {
+          "price": 119.99,
+          "name": "Centre Speaker",
+          "type": "Center Speaker"
+        },
+        {
+          "name": "Stereo Floor-Standing Speaker",
+          "type": "Speaker System",
+          "powerOutput": "100W"
+        },
+        {
+          "name": "Home Theatre Centre Speaker",
+          "type": "Center Speaker",
+          "powerOutput": "100W"
+        },
+        {
+          "name": "Home Theatre \u0026 Soundbars",
+          "type": "Soundbar"
+        },
+        {
+          "name": "Home Theatre \u0026 Soundbars",
+          "type": "Soundbar"
+        },
+        {
+          "name": "Wireless Speakers",
+          "type": "Speaker System"
+        }
+      ]
+    },
+    "JBL": {
+      "products": [
+        {
+          "connectivity": [
+            "eARC",
+            "Bluetooth"
+          ],
+          "name": "Portable Bluetooth Speakers",
+          "type": "Speaker System",
+          "powerOutput": "4W"
+        },
+        {
+          "connectivity": [
+            "Bluetooth"
+          ],
+          "name": "Speakers",
+          "type": "Speaker System"
+        },
+        {
+          "name": "Conceal C62",
+          "type": "Speaker System"
+        },
+        {
+          "name": "HDI-1200P",
+          "type": "Subwoofer",
+          "powerOutput": "1000W"
+        },
+        {
+          "connectivity": [
+            "eARC",
+            "Bluetooth"
+          ],
+          "name": "JBL Jr310BT",
+          "type": "Speaker System",
+          "powerOutput": "1W"
+        },
+        {
+          "connectivity": [
+            "eARC",
+            "Bluetooth"
+          ],
+          "price": 50.0,
+          "name": "Partybox Speakers",
+          "type": "Speaker System",
+          "powerOutput": "3W"
+        },
+        {
+          "name": "Speakers",
+          "type": "Speaker System"
+        },
+        {
+          "price": 79.98,
+          "name": "JBL PBM100 Wired Microphone",
+          "type": "Speaker System",
+          "powerOutput": "100W"
+        },
+        {
+          "connectivity": [
+            "eARC",
+            "Bluetooth"
+          ],
+          "price": 200.0,
+          "name": "JBL Stage A180",
+          "type": "Subwoofer",
+          "powerOutput": "4W"
+        },
+        {
+          "name": "Conceal C62",
+          "type": "Speaker System"
+        },
+        {
+          "name": "Conceal C82W",
+          "type": "Subwoofer",
+          "powerOutput": "82W"
+        },
+        {
+          "price": 349.98,
+          "name": "JBL Stage A125C",
+          "type": "Center Speaker",
+          "powerOutput": "125W",
+          "speakerConfiguration": "5.2"
+        },
+        {
+          "price": 629.98,
+          "name": "JBL Stage A120P",
+          "type": "Subwoofer",
+          "powerOutput": "500W"
+        },
+        {
+          "name": "HDI-1200P",
+          "type": "Subwoofer",
+          "powerOutput": "1000W"
+        },
+        {
+          "name": "JBL Stage A125C",
+          "type": "Center Speaker",
+          "speakerConfiguration": "5.2"
+        },
+        {
+          "name": "JBL Stage A125C",
+          "type": "Center Speaker",
+          "powerOutput": "125W",
+          "speakerConfiguration": "5.2"
+        },
+        {
+          "price": 489.98,
+          "name": "JBL Stage A180",
+          "type": "Speaker System"
+        },
+        {
+          "price": 1019.99,
+          "name": "The Terrace Outdoor Soundbar LST70T",
+          "type": "Subwoofer"
+        },
+        {
+          "name": "S-series All-in-one 5.0ch. Wireless Dolby ATMOS Soundbar w/ Q-Symphony / HW-S61D",
+          "audioTechnology": [
+            "Dolby Atmos"
+          ],
+          "type": "Soundbar",
+          "speakerConfiguration": "5.0"
+        },
+        {
+          "name": "Sound Tower 240W Bi-directional High Power Audio w/ Built-in Battery / MX-ST50B",
+          "type": "Speaker System",
+          "powerOutput": "240W"
+        },
+        {
+          "name": "Wireless Rear Speaker Kit 9200S",
+          "type": "Speaker System"
+        },
+        {
+          "name": "Music Frame / Dolby Atmos / Smart Speaker",
+          "audioTechnology": [
+            "Dolby Atmos"
+          ],
+          "type": "Speaker System"
+        }
+      ]
+    },
+    "LG": {
+      "products": [
+        {
+          "name": "LG LHB655NW",
+          "type": "Speaker System",
+          "powerOutput": "655W"
+        },
+        {
+          "name": "LG XBOOM ON7 500W One Body Speaker with Super Bass Boost, Karaoke \u0026 DJ Function",
+          "type": "Speaker System",
+          "powerOutput": "7W"
+        },
+        {
+          "name": "LG XBOOM ON5, DJ Audio System with Super Bass Boost, Party Strobe \u0026 DJ App",
+          "type": "Speaker System"
+        },
+        {
+          "connectivity": [
+            "Bluetooth"
+          ],
+          "name": "LG XBOOM XL7S",
+          "type": "Speaker System"
+        },
+        {
+          "name": "LG XBOOM Go XG7QBK 30w Speaker",
+          "type": "Speaker System",
+          "powerOutput": "30W"
+        },
+        {
+          "connectivity": [
+            "Bluetooth"
+          ],
+          "name": "LG 2023 XBOOM XL5S Party Speaker with Bluetooth",
+          "type": "Speaker System"
+        },
+        {
+          "name": "XBOOM360 RP4",
+          "type": "Speaker System"
+        },
+        {
+          "name": "LG Sound Systems PK5",
+          "type": "Speaker System"
+        },
+        {
+          "connectivity": [
+            "Bluetooth"
+          ],
+          "name": "LG TONE Free HBS-FN6 Bluetooth® Wireless Stereo Earbuds (white)",
+          "type": "Speaker System"
+        },
+        {
+          "connectivity": [
+            "Bluetooth"
+          ],
+          "name": "LG TONE Free HBS-FN6 Bluetooth Wireless Stereo Earbuds Black",
+          "type": "Speaker System"
+        },
+        {
+          "connectivity": [
+            "Bluetooth"
+          ],
+          "name": "LG TONE Free HBS-FN4 Bluetooth® Wireless Stereo Earbuds with Meridian Audio (White)",
+          "type": "Speaker System"
+        }
+      ]
+    },
+    "Samsung": {
+      "products": [
+        {
+          "name": "Ultra-slim 3.1ch. Wireless Dolby ATMOS Soundbar w/ Q-Symphony / HW-S700D",
+          "audioTechnology": [
+            "Dolby Atmos"
+          ],
+          "type": "Soundbar",
+          "speakerConfiguration": "3.1"
+        }
+      ]
+    }
+  }
+}

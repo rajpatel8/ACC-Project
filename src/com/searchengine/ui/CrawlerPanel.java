@@ -16,7 +16,9 @@ public class CrawlerPanel extends JPanel {
             "https://www.sony.ca/en/home-theatre-sound-bars/home-theatre-systems",
             "https://www.lg.com/levant_en/home-theater-system",
             "https://www.samsung.com/us/televisions-home-theater/home-theater/all-home-theater/",
-            "https://www.jbl.com/center-channel-speakers/"
+            "https://ca.jbl.com/en_CA/search?q=home%20theater",
+            "https://www.sonos.com/en-ca/shop/home-theater",
+            "https://www.denon.com/en-us/",
     };
 
     private JTextArea logArea;
@@ -68,7 +70,7 @@ public class CrawlerPanel extends JPanel {
 
         CrawlerConfig config = new CrawlerConfig();
         config.setMaxDepth(2);
-        config.setMaxPages(20);
+        config.setMaxPages(50);
         config.setHeadless(true);
 
         PageCache cache = new PageCache(config.getCacheConfig().getCacheDirectory(),

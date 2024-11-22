@@ -7,12 +7,19 @@ import org.openqa.selenium.chrome.ChromeDriver;
 import org.openqa.selenium.chrome.ChromeOptions;
 import org.openqa.selenium.support.ui.WebDriverWait;
 import org.openqa.selenium.support.ui.ExpectedConditions;
+
+import java.io.IOException;
+import java.nio.charset.StandardCharsets;
+import java.nio.file.Path;
+import java.nio.file.Paths;
 import java.time.Duration;
 import java.util.*;
 import java.util.concurrent.*;
 import java.util.concurrent.TimeoutException;
 
 import com.searchengine.model.*;
+
+import java.nio.file.Files;
 
 public class WebCrawler {
     private final CrawlSession session;
@@ -390,36 +397,64 @@ private void processCrawlRequest(String url) {
     }
 }
 
-    private WebPage crawlPage(WebDriver driver, String url) {
-        System.out.println("DEBUG: Starting to crawl page: " + url);
-        try {
-            if (cache.hasValidCache(url)) {
-                System.out.println("DEBUG: Found cached page for: " + url);
-                return cache.getFromCache(url);
-            }
-
-            WebPage page = new WebPage();
-            page.setUrl(url);
-
-            System.out.println("DEBUG: Navigating to URL");
-            driver.get(url);
-
-            System.out.println("DEBUG: Waiting for page load");
-            WebDriverWait wait = new WebDriverWait(driver, Duration.ofSeconds(config.getPageLoadTimeout()));
-            wait.until(webDriver -> ((JavascriptExecutor) webDriver)
-                    .executeScript("return document.readyState")
-                    .equals("complete"));
-
-            System.out.println("DEBUG: Page loaded, extracting information");
-            extractPageInformation(driver, page);
-
-            cache.addToCache(page);
-
-            return page;
-        } catch (Exception e) {
-            System.err.println("DEBUG: Error while crawling page: " + url);
-            e.printStackTrace();
-            return null;
+private void savePageHtml(String url, WebDriver driver) {
+    try {
+        // Create html_pages directory if it doesn't exist
+        Path htmlDir = Paths.get("html_pages");
+        if (!Files.exists(htmlDir)) {
+            Files.createDirectories(htmlDir);
         }
+
+        // Generate a safe filename from the URL
+        String filename = url.replaceAll("[^a-zA-Z0-9.-]", "_") + ".html";
+        Path filePath = htmlDir.resolve(filename);
+
+        // Get the page source (HTML content)
+        String pageSource = driver.getPageSource();
+
+        // Save the HTML content
+        Files.writeString(filePath, pageSource, StandardCharsets.UTF_8);
+        System.out.println("DEBUG: Saved HTML for URL: " + url + " to " + filePath);
+
+    } catch (IOException e) {
+        System.err.println("ERROR: Failed to save HTML for URL: " + url);
+        e.printStackTrace();
     }
+}
+
+private WebPage crawlPage(WebDriver driver, String url) {
+    System.out.println("DEBUG: Starting to crawl page: " + url);
+    try {
+        if (cache.hasValidCache(url)) {
+            System.out.println("DEBUG: Found cached page for: " + url);
+            return cache.getFromCache(url);
+        }
+
+        WebPage page = new WebPage();
+        page.setUrl(url);
+
+        System.out.println("DEBUG: Navigating to URL");
+        driver.get(url);
+
+        System.out.println("DEBUG: Waiting for page load");
+        WebDriverWait wait = new WebDriverWait(driver, Duration.ofSeconds(config.getPageLoadTimeout()));
+        wait.until(webDriver -> ((JavascriptExecutor) webDriver)
+                .executeScript("return document.readyState")
+                .equals("complete"));
+
+        // Save HTML content after page is fully loaded
+        savePageHtml(url, driver);
+
+        System.out.println("DEBUG: Page loaded, extracting information");
+        extractPageInformation(driver, page);
+
+        cache.addToCache(page);
+
+        return page;
+    } catch (Exception e) {
+        System.err.println("DEBUG: Error while crawling page: " + url);
+        e.printStackTrace();
+        return null;
+    }
+}
 }

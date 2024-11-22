@@ -1,7 +1,6 @@
 package com.searchengine.ui;
 
 import com.searchengine.core.search.SearchEngine;
-import com.searchengine.core.SearchResult;
 import com.searchengine.model.Product;
 import javax.swing.*;
 import java.awt.*;

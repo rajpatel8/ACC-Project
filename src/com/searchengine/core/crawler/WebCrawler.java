@@ -77,6 +77,9 @@ public class WebCrawler {
               
                 processCrawlRequest(url);
             }
+            if (session.getPagesProcessed() >= config.getMaxPages()) {
+                break;
+            }
         }
 
         if (isRunning) {

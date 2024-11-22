@@ -3,6 +3,7 @@ package com.searchengine.core.crawler;
 import java.util.HashSet;
 import java.util.Set;
 
+import com.searchengine.core.cache.CacheConfig;
 import org.openqa.selenium.chrome.ChromeOptions;
 
 public class CrawlerConfig {
@@ -22,6 +23,12 @@ public class CrawlerConfig {
     private int proxyPort;
     private Set <String> allowedDomains;
     private Set<String> excludedUrls;
+    private CacheConfig cacheConfig;
+    private boolean extractProducts = true;
+    private boolean saveImages = false;
+    private String outputDirectory = "crawled_data";
+    private Set<String> allowedProductCategories;
+    private Set<String> excludedProductTypes;
 
     public CrawlerConfig() {
         this.maxDepth = 3;
@@ -29,7 +36,7 @@ public class CrawlerConfig {
         this.threadCount = 4;
         this.driverPath = "/opt/homebrew/bin/chromedriver";
         this.pageLoadTimeout = 30;
-        this.headless = false;
+        this.headless = true;
         this.retryAttempts = 3;
         this.retryDelay = 1000;
         this.userAgent = "SearchEngineBot/1.0";
@@ -37,6 +44,9 @@ public class CrawlerConfig {
         this.imagesEnabled = true;
         this.allowedDomains = new HashSet<>();
         this.excludedUrls = new HashSet<>();
+        this.cacheConfig = new CacheConfig();
+        this.allowedProductCategories = new HashSet<>();
+        this.excludedProductTypes = new HashSet<>();
     }
 
     // Getters and Setters
@@ -61,6 +71,40 @@ public class CrawlerConfig {
     public void setHeadless(boolean headless) { 
         this.headless = headless;
         updateChromeOptions();
+    }
+
+    public CacheConfig getCacheConfig() { return cacheConfig; }
+    public void setCacheConfig(CacheConfig cacheConfig) {
+        this.cacheConfig = cacheConfig;
+    }
+
+    public boolean isExtractProducts() { return extractProducts; }
+    public void setExtractProducts(boolean extractProducts) {
+        this.extractProducts = extractProducts;
+    }
+
+    public boolean isSaveImages() { return saveImages; }
+    public void setSaveImages(boolean saveImages) {
+        this.saveImages = saveImages;
+    }
+
+    public String getOutputDirectory() { return outputDirectory; }
+    public void setOutputDirectory(String outputDirectory) {
+        this.outputDirectory = outputDirectory;
+    }
+
+    public Set<String> getAllowedProductCategories() {
+        return allowedProductCategories;
+    }
+    public void addAllowedProductCategory(String category) {
+        this.allowedProductCategories.add(category);
+    }
+
+    public Set<String> getExcludedProductTypes() {
+        return excludedProductTypes;
+    }
+    public void addExcludedProductType(String type) {
+        this.excludedProductTypes.add(type);
     }
 
     public ChromeOptions getChromeOptions() { return chromeOptions; }

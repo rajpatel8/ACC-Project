@@ -100,7 +100,7 @@ public class CrawlerTest {
         // Start crawling
         try {
             System.out.println("Initializing crawler...");
-            crawler.startCrawling("https://example.com");
+            crawler.startCrawling("https://www.bose.ca/en/c/home-theater");
         } catch (Exception e) {
             System.err.println("Fatal error: " + e.getMessage());
             e.printStackTrace();

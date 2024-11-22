@@ -1,6 +1,7 @@
 // File: src/com/searchengine/core/crawler/WebCrawler.java
 package com.searchengine.core.crawler;
 
+import com.searchengine.core.cache.PageCache;
 import org.openqa.selenium.*;
 import org.openqa.selenium.chrome.ChromeDriver;
 import org.openqa.selenium.chrome.ChromeOptions;
@@ -20,6 +21,9 @@ public class WebCrawler {
     private final List<CrawlerObserver> observers;
     private volatile boolean isRunning;
     private final Map<Long, WebDriver> drivers;
+    private PageCache cache = null;
+
+
 
     public WebCrawler(CrawlerConfig config) {
         this.config = config;
@@ -28,7 +32,18 @@ public class WebCrawler {
         this.observers = new ArrayList<>();
         this.isRunning = false;
         this.drivers = new ConcurrentHashMap<>();
-        
+        setupWebDriver();
+    }
+
+    public WebCrawler(CrawlerConfig config, PageCache cache) {
+        this.config = config;
+        this.session = new CrawlSession();
+        this.executorService = Executors.newFixedThreadPool(config.getThreadCount());
+        this.observers = new ArrayList<>();
+        this.isRunning = false;
+        this.drivers = new ConcurrentHashMap<>();
+        this.cache = cache;
+
         setupWebDriver();
     }
 
@@ -375,29 +390,36 @@ private void processCrawlRequest(String url) {
     }
 }
 
-private WebPage crawlPage(WebDriver driver, String url) {
-    System.out.println("DEBUG: Starting to crawl page: " + url);
-    try {
-        WebPage page = new WebPage();
-        page.setUrl(url);
+    private WebPage crawlPage(WebDriver driver, String url) {
+        System.out.println("DEBUG: Starting to crawl page: " + url);
+        try {
+            if (cache.hasValidCache(url)) {
+                System.out.println("DEBUG: Found cached page for: " + url);
+                return cache.getFromCache(url);
+            }
 
-        System.out.println("DEBUG: Navigating to URL");
-        driver.get(url);
-        
-        System.out.println("DEBUG: Waiting for page load");
-        WebDriverWait wait = new WebDriverWait(driver, Duration.ofSeconds(config.getPageLoadTimeout()));
-        wait.until(webDriver -> ((JavascriptExecutor) webDriver)
-            .executeScript("return document.readyState")
-            .equals("complete"));
+            WebPage page = new WebPage();
+            page.setUrl(url);
 
-        System.out.println("DEBUG: Page loaded, extracting information");
-        extractPageInformation(driver, page);
-        
-        return page;
-    } catch (Exception e) {
-        System.err.println("DEBUG: Error while crawling page: " + url);
-        e.printStackTrace();
-        return null;
+            System.out.println("DEBUG: Navigating to URL");
+            driver.get(url);
+
+            System.out.println("DEBUG: Waiting for page load");
+            WebDriverWait wait = new WebDriverWait(driver, Duration.ofSeconds(config.getPageLoadTimeout()));
+            wait.until(webDriver -> ((JavascriptExecutor) webDriver)
+                    .executeScript("return document.readyState")
+                    .equals("complete"));
+
+            System.out.println("DEBUG: Page loaded, extracting information");
+            extractPageInformation(driver, page);
+
+            cache.addToCache(page);
+
+            return page;
+        } catch (Exception e) {
+            System.err.println("DEBUG: Error while crawling page: " + url);
+            e.printStackTrace();
+            return null;
+        }
     }
-}
 }

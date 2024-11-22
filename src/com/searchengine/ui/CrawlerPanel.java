@@ -1,6 +1,7 @@
 // File: src/com/searchengine/ui/CrawlerPanel.java
 package com.searchengine.ui;
 
+import com.searchengine.core.cache.PageCache;
 import com.searchengine.core.crawler.CrawlerConfig;
 import com.searchengine.core.crawler.CrawlerObserver;
 import com.searchengine.core.crawler.WebCrawler;
@@ -57,55 +58,58 @@ public class CrawlerPanel extends JPanel {
     }
 
 
-        private void startCrawling() {
-            String url = (String) websiteCombo.getSelectedItem();
-            startButton.setEnabled(false);
-            stopButton.setEnabled(true);
-            isStopping = false;
-            logArea.setText("");
-            addLog("Starting crawler for: " + url);
+    private void startCrawling() {
+        String url = (String) websiteCombo.getSelectedItem();
+        startButton.setEnabled(false);
+        stopButton.setEnabled(true);
+        isStopping = false;
+        logArea.setText("");
+        addLog("Starting crawler for: " + url);
 
-            CrawlerConfig config = new CrawlerConfig();
-            config.setMaxDepth(2);
-            config.setMaxPages(20);
-            config.setHeadless(true);
+        CrawlerConfig config = new CrawlerConfig();
+        config.setMaxDepth(2);
+        config.setMaxPages(20);
+        config.setHeadless(true);
 
-            crawler = new WebCrawler(config);
-            crawler.addObserver(new CrawlerObserver() {
-                @Override
-                public void onPageCrawled(WebPage page) {
-                    SwingUtilities.invokeLater(() ->
-                            addLog("Crawled: " + page.getUrl() + "\nFound " +
-                                    page.getLinks().size() + " links\n"));
-                }
+        PageCache cache = new PageCache(config.getCacheConfig().getCacheDirectory(),
+                config.getCacheConfig().getCacheExpirationHours());
 
-                @Override
-                public void onCrawlCompleted(CrawlSession session) {
-                    SwingUtilities.invokeLater(() -> {
-                        addLog("Crawling completed. Processed " + session.getPagesProcessed() + " pages.");
-                        crawlingFinished();
-                    });
-                }
+        crawler = new WebCrawler(config, cache);
+        crawler.addObserver(new CrawlerObserver() {
+            @Override
+            public void onPageCrawled(WebPage page) {
+                SwingUtilities.invokeLater(() ->
+                        addLog("Crawled: " + page.getUrl() + "\nFound " +
+                                page.getLinks().size() + " links\n"));
+            }
 
-                @Override
-                public void onError(String url, Exception e) {
-                    SwingUtilities.invokeLater(() ->
-                            addLog("Error crawling " + url + ": " + e.getMessage() + "\n"));
-                }
-            });
+            @Override
+            public void onCrawlCompleted(CrawlSession session) {
+                SwingUtilities.invokeLater(() -> {
+                    addLog("Crawling completed. Processed " + session.getPagesProcessed() + " pages.");
+                    crawlingFinished();
+                });
+            }
 
-            new Thread(() -> {
-                try {
-                    crawler.startCrawling(url);
-                    SwingUtilities.invokeLater(this::crawlingFinished);
-                } catch (Exception e) {
-                    SwingUtilities.invokeLater(() -> {
-                        addLog("Crawler error: " + e.getMessage() + "\n");
-                        crawlingFinished();
-                    });
-                }
-            }).start();
-        }
+            @Override
+            public void onError(String url, Exception e) {
+                SwingUtilities.invokeLater(() ->
+                        addLog("Error crawling " + url + ": " + e.getMessage() + "\n"));
+            }
+        });
+
+        new Thread(() -> {
+            try {
+                crawler.startCrawling(url);
+                SwingUtilities.invokeLater(this::crawlingFinished);
+            } catch (Exception e) {
+                SwingUtilities.invokeLater(() -> {
+                    addLog("Crawler error: " + e.getMessage() + "\n");
+                    crawlingFinished();
+                });
+            }
+        }).start();
+    }
 
     private void stopCrawling() {
         isStopping = true;

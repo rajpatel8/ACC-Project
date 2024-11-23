@@ -60,12 +60,12 @@ sleep 0.5
 
 # Show banner character by character
 cat << "EOF" | while IFS= read -r line; do
-   _____                     _      _____
-  / ____|                   | |    |  ___|
- | (___   ___  __ _ _ __ ___| |__  | |__   _ __   __ _ (I) _ __   ___
-  \___ \ / _ \/ _' | '__/ __| '_ \ |  __| | '_ \ / _' || || '_ \ /  _ \
-  ____) |  __/ (_| | | | (__| | | | |____|| | | | (_| || || | | ||  __/
- |_____/ \___|\__,_|_|  \___|_| |_|______||_| |_|\__, || ||_| |_| \___|
+   _____                     _      _____                _
+  / ____|                   | |    |  ___|             (_)
+ | (___   ___  __ _ _ __ ___| |__  | |__   _ __   __ _ _ _ __   ___
+  \___ \ / _ \/ _' | '__/ __| '_ \ |  __| | '_ \ / _' | | '_ \ / _ \
+  ____) |  __/ (_| | | | (__| | | | |____|| | | | (_| | | | | |  __/
+ |_____/ \___|\__,_|_|  \___|_| |_|______||_| |_|\__, |_|_| |_|\___|
                                                   __/ |
                                                  |___/
 EOF
@@ -73,7 +73,39 @@ EOF
     sleep 0.1
 done
 
-echo -e "\n${BOLD}${PURPLE}Search Engine Builder v1.0${NC}\n"
+echo -e "\n${BOLD}${PURPLE}Product Search & Analytics System v1.0${NC}"
+echo -e "${BOLD}${CYAN}Developed by Team SearchMasters${NC}\n"
+
+# Show team info
+echo -e "\n${BOLD}${BLUE}Development Credits:${NC}"
+
+# RAJ's contributions
+echo -e "\n${CYAN}▶ RAJKUMAR${NC}"
+type_text "  ✓ Web Crawler" 0.02
+type_text "  ✓ Caching System" 0.02
+type_text "  ✓ Search Filters" 0.02
+
+# VANSH's contributions
+echo -e "\n${CYAN}▶ VANSH${NC}"
+type_text "  ✓ HTML Parser" 0.02
+type_text "  ✓ Data Validation System" 0.02
+type_text "  ✓ Spell Checking Engine" 0.02
+
+# Team contributions
+echo -e "\n${CYAN}▶ Teammate-3${NC}"
+type_text "  ✓ Word Completion System" 0.02
+type_text "  ✓ Frequency Analysis" 0.02
+type_text "  ✓ Search Frequency Tracking" 0.02
+
+echo -e "\n${CYAN}▶ Teammate-4${NC}"
+type_text "  ✓ Page Ranking Algorithm" 0.02
+type_text "  ✓ Inverted Indexing" 0.02
+type_text "  ✓ Pattern Recognition" 0.02
+
+echo -e "\n${CYAN}▶ Teammate-5${NC}"
+type_text "  ✓ History Management" 0.02
+type_text "  ✓ Statistical Analysis" 0.02
+type_text "  ✓ Popular Products Tracking" 0.02
 sleep 1
 
 # Initialize build environment

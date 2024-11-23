@@ -3,11 +3,10 @@ package com.searchengine.core.frequency;
 import com.searchengine.model.Product;
 import java.util.*;
 import java.util.concurrent.ConcurrentHashMap;
-import java.time.LocalDateTime;
 
 public class FrequencyAnalyzer {
-    private final Map<String, Map<String, Integer>> wordFrequencies; // word -> (productId -> count)
-    private final Map<String, Integer> globalWordFrequencies; // word -> total count
+    private final Map<String, Map<String, Integer>> wordFrequencies;
+    private final Map<String, Integer> globalWordFrequencies;
     private final Map<String, SearchTerm> searchHistory;
     private final Map<String, ProductFrequency> productFrequencies;
 
@@ -20,110 +19,187 @@ public class FrequencyAnalyzer {
 
     public void analyzeProducts(List<Product> products) {
         System.out.println("Analyzing product frequencies...");
-
-        for (Product product : products) {
-            analyzeProduct(product);
+        if (products == null) {
+            System.out.println("No products to analyze");
+            return;
         }
 
-        // Print some statistics
+        products.stream()
+                .filter(Objects::nonNull)
+                .forEach(this::analyzeProduct);
+
         System.out.println("Analysis completed:");
         System.out.println("- Total unique words: " + globalWordFrequencies.size());
         System.out.println("- Total products analyzed: " + productFrequencies.size());
-
-        // Print top 10 most frequent words
-        System.out.println("\nTop 10 most frequent words:");
-        globalWordFrequencies.entrySet().stream()
-                .sorted(Map.Entry.<String, Integer>comparingByValue().reversed())
-                .limit(10)
-                .forEach(e -> System.out.println("- " + e.getKey() + ": " + e.getValue()));
     }
 
     private void analyzeProduct(Product product) {
-        ProductFrequency freq = new ProductFrequency(product.getProductId());
+        try {
+            if (product == null || product.getProductId() == null) {
+                return;
+            }
 
-        // Analyze product name
-        analyzeText(product.getName(), product.getProductId(), freq);
+            ProductFrequency freq = new ProductFrequency(product.getProductId());
 
-        // Analyze features
-        for (String feature : product.getFeatures()) {
-            analyzeText(feature, product.getProductId(), freq);
+            // Analyze name
+            if (product.getName() != null) {
+                analyzeText(product.getName(), product.getProductId(), freq);
+            }
+
+            // Analyze features
+            if (product.getFeatures() != null) {
+                product.getFeatures().stream()
+                        .filter(Objects::nonNull)
+                        .forEach(feature -> analyzeText(feature, product.getProductId(), freq));
+            }
+
+            // Analyze description
+            if (product.getDescription() != null) {
+                analyzeText(product.getDescription(), product.getProductId(), freq);
+            }
+
+            // Analyze specifications
+            if (product.getSpecifications() != null) {
+                product.getSpecifications().values().stream()
+                        .filter(Objects::nonNull)
+                        .forEach(spec -> analyzeText(spec, product.getProductId(), freq));
+            }
+
+            // Analyze category
+            if (product.getCategory() != null) {
+                analyzeText(product.getCategory(), product.getProductId(), freq);
+            }
+
+            productFrequencies.put(product.getProductId(), freq);
+        } catch (Exception e) {
+            System.err.println("Error analyzing product: " + e.getMessage());
         }
-
-        // Analyze description
-        analyzeText(product.getDescription(), product.getProductId(), freq);
-
-        // Analyze specifications
-        for (Map.Entry<String, String> spec : product.getSpecifications().entrySet()) {
-            analyzeText(spec.getValue(), product.getProductId(), freq);
-        }
-
-        productFrequencies.put(product.getProductId(), freq);
     }
 
     private void analyzeText(String text, String productId, ProductFrequency freq) {
-        if (text == null) return;
+        try {
+            if (text == null || text.trim().isEmpty() || productId == null || freq == null) {
+                return;
+            }
 
-        // Split text into words and clean
-        String[] words = text.toLowerCase()
-                .replaceAll("[^a-z0-9\\s-]", " ")
-                .split("\\s+");
+            String[] words = text.toLowerCase()
+                    .replaceAll("[^a-z0-9\\s-]", " ")
+                    .trim()
+                    .split("\\s+");
 
-        for (String word : words) {
-            if (word.length() <= 2) continue; // Skip very short words
+            for (String word : words) {
+                if (word == null || word.length() <= 2 || word.trim().isEmpty()) {
+                    continue;
+                }
 
-            // Update word frequencies for this product
-            wordFrequencies
-                    .computeIfAbsent(word, k -> new ConcurrentHashMap<>())
-                    .merge(productId, 1, Integer::sum);
+                // Update word frequencies for this product
+                Map<String, Integer> productCounts = wordFrequencies.computeIfAbsent(word,
+                        k -> new ConcurrentHashMap<>());
+                if (productCounts != null) {
+                    productCounts.merge(productId, 1, Integer::sum);
+                }
 
-            // Update global word frequency
-            globalWordFrequencies.merge(word, 1, Integer::sum);
+                // Update global word frequency
+                if (globalWordFrequencies != null) {
+                    globalWordFrequencies.merge(word, 1, Integer::sum);
+                }
 
-            // Update product frequency
-            freq.incrementWordCount(word);
+                // Update product frequency
+                freq.incrementWordCount(word);
+            }
+        } catch (Exception e) {
+            System.err.println("Error analyzing text: " + e.getMessage());
         }
     }
 
     public void recordSearch(String query) {
-        if (query == null || query.trim().isEmpty()) return;
+        try {
+            if (query == null || query.trim().isEmpty()) {
+                return;
+            }
 
-        query = query.toLowerCase().trim();
-        String finalQuery = query;
-        SearchTerm searchTerm = searchHistory.computeIfAbsent(query,
-                k -> new SearchTerm(finalQuery));
-        searchTerm.incrementCount();
-    }
-
-    public int getWordFrequency(String word, String productId) {
-        if (word == null || productId == null) return 0;
-        return wordFrequencies
-                .getOrDefault(word.toLowerCase(), Collections.emptyMap())
-                .getOrDefault(productId, 0);
-    }
-
-    public int getGlobalWordFrequency(String word) {
-        if (word == null) return 0;
-        return globalWordFrequencies.getOrDefault(word.toLowerCase(), 0);
+            query = query.toLowerCase().trim();
+            final String finalQuery = query;
+            SearchTerm searchTerm = searchHistory.computeIfAbsent(finalQuery,
+                    k -> new SearchTerm(finalQuery));
+            if (searchTerm != null) {
+                searchTerm.incrementCount();
+            }
+        } catch (Exception e) {
+            System.err.println("Error recording search: " + e.getMessage());
+        }
     }
 
     public List<FrequencyResult> getTopWords(int limit) {
-        return globalWordFrequencies.entrySet().stream()
-                .map(e -> new FrequencyResult(e.getKey(), e.getValue()))
-                .sorted(Comparator.comparingInt(FrequencyResult::getFrequency).reversed())
-                .limit(limit)
-                .toList();
+        try {
+            if (limit <= 0) {
+                return Collections.emptyList();
+            }
+
+            return globalWordFrequencies.entrySet().stream()
+                    .filter(e -> e.getKey() != null && e.getValue() != null)
+                    .map(e -> new FrequencyResult(e.getKey(), e.getValue()))
+                    .sorted(Comparator.comparingInt(FrequencyResult::getFrequency).reversed())
+                    .limit(limit)
+                    .toList();
+        } catch (Exception e) {
+            System.err.println("Error getting top words: " + e.getMessage());
+            return Collections.emptyList();
+        }
     }
 
     public List<SearchTerm> getTopSearches(int limit) {
-        return searchHistory.values().stream()
-                .sorted(Comparator.comparingInt(SearchTerm::getCount).reversed())
-                .limit(limit)
-                .toList();
+        try {
+            if (limit <= 0) {
+                return Collections.emptyList();
+            }
+
+            return searchHistory.values().stream()
+                    .filter(Objects::nonNull)
+                    .sorted(Comparator.comparingInt(SearchTerm::getCount).reversed())
+                    .limit(limit)
+                    .toList();
+        } catch (Exception e) {
+            System.err.println("Error getting top searches: " + e.getMessage());
+            return Collections.emptyList();
+        }
+    }
+
+    public int getWordFrequency(String word, String productId) {
+        try {
+            if (word == null || productId == null) {
+                return 0;
+            }
+            Map<String, Integer> productCounts = wordFrequencies.get(word.toLowerCase());
+            return productCounts != null ? productCounts.getOrDefault(productId, 0) : 0;
+        } catch (Exception e) {
+            System.err.println("Error getting word frequency: " + e.getMessage());
+            return 0;
+        }
+    }
+
+    public int getGlobalWordFrequency(String word) {
+        try {
+            if (word == null) {
+                return 0;
+            }
+            return globalWordFrequencies.getOrDefault(word.toLowerCase(), 0);
+        } catch (Exception e) {
+            System.err.println("Error getting global word frequency: " + e.getMessage());
+            return 0;
+        }
     }
 
     public Map<String, Integer> getWordFrequenciesForProduct(String productId) {
-        return productFrequencies
-                .getOrDefault(productId, new ProductFrequency(productId))
-                .getWordFrequencies();
+        try {
+            if (productId == null) {
+                return Collections.emptyMap();
+            }
+            ProductFrequency freq = productFrequencies.get(productId);
+            return freq != null ? freq.getWordFrequencies() : Collections.emptyMap();
+        } catch (Exception e) {
+            System.err.println("Error getting word frequencies for product: " + e.getMessage());
+            return Collections.emptyMap();
+        }
     }
 }

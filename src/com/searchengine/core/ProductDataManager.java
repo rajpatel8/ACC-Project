@@ -62,8 +62,8 @@ public class ProductDataManager {
                     .forEach(htmlFile -> {
                         try {
                             String content = Files.readString(htmlFile);
-                            List<Product> extracted = HTMLParser.extractProducts(content, company);
-                            products.addAll(extracted);
+//                            List<Product> extracted = HTMLParser.extractProducts(content, company);
+//                            products.addAll(extracted);
                         } catch (IOException e) {
                             System.err.println("Error reading file: " + htmlFile);
                         }

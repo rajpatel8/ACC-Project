@@ -1,7 +1,6 @@
 package com.searchengine.ui;
 
 import com.searchengine.core.search.SearchEngine;
-import com.searchengine.core.SearchResult;
 import com.searchengine.core.completion.WordCompletion;
 import com.searchengine.model.Product;
 import com.google.gson.Gson;
@@ -276,32 +275,106 @@ public class SearchPanel extends JPanel {
     }
 
     private void displayResults(List<Product> results) {
-        StringBuilder sb = new StringBuilder();
+        // Clear previous results
+        resultArea.removeAll();
+
+        JPanel resultsPanel = new JPanel();
+        resultsPanel.setLayout(new BoxLayout(resultsPanel, BoxLayout.Y_AXIS));
+        resultsPanel.setBackground(Color.WHITE);
 
         if (results.isEmpty()) {
-            sb.append("No products found matching your search.\n");
+            JLabel noResultsLabel = new JLabel("No products found matching your search.");
+            noResultsLabel.setForeground(Color.RED);
+            noResultsLabel.setFont(new Font("Arial", Font.BOLD, 18));
+            noResultsLabel.setHorizontalAlignment(SwingConstants.CENTER);
+            resultsPanel.add(noResultsLabel);
         } else {
-            sb.append("Found ").append(results.size()).append(" products:\n\n");
+            JLabel resultsHeader = new JLabel("🔍 Found " + results.size() + " products:");
+            resultsHeader.setFont(new Font("Arial", Font.BOLD, 20));
+            resultsHeader.setForeground(new Color(0, 123, 255)); // Blue color
+            resultsHeader.setAlignmentX(Component.LEFT_ALIGNMENT);
+            resultsPanel.add(resultsHeader);
+            resultsPanel.add(Box.createVerticalStrut(15)); // Add space below header
 
             for (Product product : results) {
-                sb.append("Name: ").append(product.getName()).append("\n");
-                sb.append("Company: ").append(product.getCategory()).append("\n");
-                sb.append("Price: $").append(String.format("%.2f", product.getPrice())).append("\n");
-                sb.append("Type: ").append(product.getSpecifications().get("Type")).append("\n");
-                sb.append("Features:\n");
+                JPanel productPanel = new JPanel();
+                productPanel.setLayout(new BorderLayout());
+                productPanel.setBorder(BorderFactory.createCompoundBorder(
+                        BorderFactory.createLineBorder(new Color(200, 200, 200), 2, true),
+                        BorderFactory.createEmptyBorder(10, 10, 10, 10) // Add padding
+                ));
+                productPanel.setBackground(new Color(248, 249, 250)); // Light gray
+                productPanel.setMaximumSize(new Dimension(600, 250));
+                productPanel.setAlignmentX(Component.LEFT_ALIGNMENT);
+
+                // Product Image
+                JLabel imageLabel = new JLabel();
+                ImageIcon productImage = new ImageIcon("/Users/lord_rajkumar/Desktop/Project/ACC/src/stock.jpg"); // Path to the default image
+                Image scaledImage = productImage.getImage().getScaledInstance(100, 100, Image.SCALE_SMOOTH);
+                imageLabel.setIcon(new ImageIcon(scaledImage));
+                imageLabel.setHorizontalAlignment(SwingConstants.CENTER);
+
+                // Text Information Panel
+                JPanel infoPanel = new JPanel();
+                infoPanel.setLayout(new BoxLayout(infoPanel, BoxLayout.Y_AXIS));
+                infoPanel.setBackground(new Color(248, 249, 250));
+                infoPanel.setBorder(BorderFactory.createEmptyBorder(5, 10, 5, 10)); // Padding inside info panel
+
+                // Product Name
+                JLabel nameLabel = new JLabel("📦 " + product.getName());
+                nameLabel.setFont(new Font("Arial", Font.BOLD, 18));
+                nameLabel.setForeground(new Color(52, 58, 64));
+
+                // Product Category
+                JLabel companyLabel = new JLabel("🏢 Company: " + product.getCategory());
+                companyLabel.setFont(new Font("Arial", Font.PLAIN, 14));
+                companyLabel.setForeground(new Color(108, 117, 125));
+
+                // Product Price
+                JLabel priceLabel = new JLabel("💲 Price: $" + String.format("%.2f", product.getPrice()));
+                priceLabel.setFont(new Font("Arial", Font.BOLD, 16));
+                priceLabel.setForeground(new Color(40, 167, 69)); // Green
+
+                // Product Type
+                JLabel typeLabel = new JLabel("🛠️ Type: " + product.getSpecifications().get("Type"));
+                typeLabel.setFont(new Font("Arial", Font.PLAIN, 14));
+                typeLabel.setForeground(new Color(73, 80, 87));
+
+                // Features
+                JPanel featuresPanel = new JPanel();
+                featuresPanel.setLayout(new FlowLayout(FlowLayout.LEFT));
+                featuresPanel.setBackground(new Color(248, 249, 250));
                 for (String feature : product.getFeatures()) {
-                    sb.append("  - ").append(feature).append("\n");
+                    JLabel featureLabel = new JLabel("✔️ " + feature);
+                    featureLabel.setFont(new Font("Arial", Font.ITALIC, 12));
+                    featureLabel.setForeground(Color.DARK_GRAY);
+                    featuresPanel.add(featureLabel);
                 }
-                sb.append("Specifications:\n");
-                for (Map.Entry<String, String> spec : product.getSpecifications().entrySet()) {
-                    sb.append("  - ").append(spec.getKey()).append(": ")
-                            .append(spec.getValue()).append("\n");
-                }
-                sb.append("\n");
+
+                // Add elements to the info panel
+                infoPanel.add(nameLabel);
+                infoPanel.add(Box.createVerticalStrut(5));
+                infoPanel.add(companyLabel);
+                infoPanel.add(priceLabel);
+                infoPanel.add(typeLabel);
+                infoPanel.add(featuresPanel);
+
+                // Add Image and Info Panel to Product Panel
+                productPanel.add(imageLabel, BorderLayout.WEST);
+                productPanel.add(infoPanel, BorderLayout.CENTER);
+
+                // Add space between products
+                resultsPanel.add(productPanel);
+                resultsPanel.add(Box.createVerticalStrut(15));
             }
         }
 
-        resultArea.setText(sb.toString());
-        resultArea.setCaretPosition(0);
+        // Add results to the result area
+        resultArea.setLayout(new BorderLayout());
+        resultArea.add(new JScrollPane(resultsPanel), BorderLayout.CENTER);
+
+        // Refresh the UI
+        resultArea.revalidate();
+        resultArea.repaint();
     }
 }

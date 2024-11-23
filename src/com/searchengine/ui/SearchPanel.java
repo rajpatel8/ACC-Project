@@ -15,6 +15,7 @@ import java.nio.file.Files;
 import java.nio.file.Paths;
 import java.util.*;
 import java.util.List;
+import java.util.stream.Collectors;
 
 public class SearchPanel extends JPanel {
     private final SearchEngine searchEngine;
@@ -33,9 +34,166 @@ public class SearchPanel extends JPanel {
         this.searchEngine = searchEngine;
         this.wordCompletion = new WordCompletion();
         this.products = new ArrayList<>();
+        setLayout(new BorderLayout(5, 5));
+        setBorder(BorderFactory.createEmptyBorder(10, 10, 10, 10));
+
         initializeUI();
         loadProductData();
+        addFilterPanel();
     }
+
+    private void addFilterPanel() {
+        // Create filter panel
+        JPanel filterPanel = new JPanel();
+        filterPanel.setLayout(new BoxLayout(filterPanel, BoxLayout.Y_AXIS));
+        filterPanel.setBorder(BorderFactory.createTitledBorder("Filters"));
+
+        // Company filter
+        JPanel companyPanel = new JPanel(new FlowLayout(FlowLayout.LEFT));
+        companyPanel.add(new JLabel("Company:"));
+        Set<String> companies = new HashSet<>();
+        companies.add("All");
+        products.forEach(p -> companies.add(p.getCategory()));
+        JComboBox<String> companyCombo = new JComboBox<>(companies.toArray(new String[0]));
+        companyPanel.add(companyCombo);
+
+        // Price range filter
+        JPanel pricePanel = new JPanel(new FlowLayout(FlowLayout.LEFT));
+        pricePanel.add(new JLabel("Price Range:"));
+        JTextField minPrice = new JTextField(8);
+        JTextField maxPrice = new JTextField(8);
+        pricePanel.add(new JLabel("Min $"));
+        pricePanel.add(minPrice);
+        pricePanel.add(new JLabel("Max $"));
+        pricePanel.add(maxPrice);
+
+        // Features filter
+        JPanel featuresPanel = new JPanel(new BorderLayout());
+        featuresPanel.setBorder(BorderFactory.createTitledBorder("Features"));
+
+        // Collect all unique features
+        Set<String> allFeatures = new HashSet<>();
+        products.forEach(p -> allFeatures.addAll(p.getFeatures()));
+
+        // Create checkboxes for features
+        Map<String, JCheckBox> featureCheckboxes = new HashMap<>();
+        JPanel checkboxPanel = new JPanel(new GridLayout(0, 2, 5, 5));
+        for (String feature : allFeatures) {
+            JCheckBox checkbox = new JCheckBox(feature);
+            featureCheckboxes.put(feature, checkbox);
+            checkboxPanel.add(checkbox);
+        }
+
+        // Make features scrollable
+        JScrollPane featuresScrollPane = new JScrollPane(checkboxPanel);
+        featuresScrollPane.setPreferredSize(new Dimension(300, 200));
+        featuresScrollPane.setVerticalScrollBarPolicy(JScrollPane.VERTICAL_SCROLLBAR_AS_NEEDED);
+        featuresPanel.add(featuresScrollPane, BorderLayout.CENTER);
+
+        // Add "Apply Filters" button
+        JButton applyButton = new JButton("Apply Filters");
+        applyButton.addActionListener(e -> {
+            String selectedCompany = (String) companyCombo.getSelectedItem();
+
+            // Get price range
+            double min = -1, max = Double.MAX_VALUE;
+            try {
+                if (!minPrice.getText().isEmpty()) {
+                    min = Double.parseDouble(minPrice.getText());
+                }
+                if (!maxPrice.getText().isEmpty()) {
+                    max = Double.parseDouble(maxPrice.getText());
+                }
+            } catch (NumberFormatException ex) {
+                JOptionPane.showMessageDialog(this,
+                        "Please enter valid price values",
+                        "Invalid Input",
+                        JOptionPane.ERROR_MESSAGE);
+                return;
+            }
+
+            // Get selected features
+            Set<String> selectedFeatures = featureCheckboxes.entrySet().stream()
+                    .filter(entry -> entry.getValue().isSelected())
+                    .map(Map.Entry::getKey)
+                    .collect(Collectors.toSet());
+
+            // Apply filters
+            List<Product> filteredResults = filterProducts(
+                    selectedCompany,
+                    min,
+                    max,
+                    selectedFeatures
+            );
+
+            // Display filtered results
+            displayResults(filteredResults);
+        });
+
+        // Reset filters button
+        JButton resetButton = new JButton("Reset Filters");
+        resetButton.addActionListener(e -> {
+            companyCombo.setSelectedItem("All");
+            minPrice.setText("");
+            maxPrice.setText("");
+            featureCheckboxes.values().forEach(cb -> cb.setSelected(false));
+            displayResults(products);
+        });
+
+        // Create a main content panel for the filters
+        JPanel filtersContentPanel = new JPanel();
+        filtersContentPanel.setLayout(new BoxLayout(filtersContentPanel, BoxLayout.Y_AXIS));
+
+        // Add filter components to the content panel
+        filtersContentPanel.add(companyPanel);
+        filtersContentPanel.add(Box.createVerticalStrut(10));
+        filtersContentPanel.add(pricePanel);
+        filtersContentPanel.add(Box.createVerticalStrut(10));
+        filtersContentPanel.add(featuresPanel);
+
+        // Create button panel
+        JPanel buttonPanel = new JPanel(new FlowLayout(FlowLayout.CENTER));
+        buttonPanel.add(applyButton);
+        buttonPanel.add(resetButton);
+
+        // Use BorderLayout for the main filter panel
+        filterPanel.setLayout(new BorderLayout());
+        filterPanel.add(filtersContentPanel, BorderLayout.CENTER);
+        filterPanel.add(buttonPanel, BorderLayout.SOUTH);
+
+        // Add filter panel to main panel
+        add(filterPanel, BorderLayout.WEST);
+    }
+
+    private List<Product> filterProducts(String company, double minPrice, double maxPrice, Set<String> selectedFeatures) {
+        return products.stream()
+                .filter(product -> {
+                    // Filter by company
+                    if (!"All".equals(company) && !product.getCategory().equals(company)) {
+                        return false;
+                    }
+
+                    // Filter by price range
+                    if (minPrice >= 0 && product.getPrice() < minPrice) {
+                        return false;
+                    }
+                    if (maxPrice < Double.MAX_VALUE && product.getPrice() > maxPrice) {
+                        return false;
+                    }
+
+                    // Filter by features
+                    if (!selectedFeatures.isEmpty()) {
+                        return product.getFeatures().stream()
+                                .anyMatch(selectedFeatures::contains);
+                    }
+
+                    return true;
+                })
+                .collect(Collectors.toList());
+    }
+
+
+
 
     private void initializeUI() {
         setLayout(new BorderLayout(5, 5));
@@ -402,6 +560,8 @@ public class SearchPanel extends JPanel {
         JPanel resultsPanel = new JPanel();
         resultsPanel.setLayout(new BoxLayout(resultsPanel, BoxLayout.Y_AXIS));
         resultsPanel.setBackground(Color.WHITE);
+        // Add padding around the panel
+        resultsPanel.setBorder(BorderFactory.createEmptyBorder(10, 10, 10, 10));
 
         if (results.isEmpty()) {
             JLabel noResultsLabel = new JLabel("No products found matching your search.");
@@ -412,79 +572,98 @@ public class SearchPanel extends JPanel {
         } else {
             JLabel resultsHeader = new JLabel("🔍 Found " + results.size() + " products:");
             resultsHeader.setFont(new Font("Arial", Font.BOLD, 20));
-            resultsHeader.setForeground(new Color(0, 123, 255)); // Blue color
+            resultsHeader.setForeground(new Color(0, 123, 255));
             resultsHeader.setAlignmentX(Component.LEFT_ALIGNMENT);
             resultsPanel.add(resultsHeader);
-            resultsPanel.add(Box.createVerticalStrut(15)); // Add space below header
+            resultsPanel.add(Box.createVerticalStrut(15));
 
             for (Product product : results) {
                 JPanel productPanel = new JPanel();
-                productPanel.setLayout(new BorderLayout());
+                productPanel.setLayout(new BorderLayout(10, 0)); // Add horizontal gap
                 productPanel.setBorder(BorderFactory.createCompoundBorder(
-                        BorderFactory.createLineBorder(new Color(200, 200, 200), 2, true),
-                        BorderFactory.createEmptyBorder(10, 10, 10, 10) // Add padding
+                        BorderFactory.createLineBorder(new Color(200, 200, 200), 1),
+                        BorderFactory.createEmptyBorder(15, 15, 15, 15)
                 ));
-                productPanel.setBackground(new Color(248, 249, 250)); // Light gray
-                productPanel.setMaximumSize(new Dimension(600, 250));
+                productPanel.setBackground(Color.WHITE);
+                productPanel.setMaximumSize(new Dimension(1200, 180)); // Increased width
+                productPanel.setPreferredSize(new Dimension(1000, 180));
                 productPanel.setAlignmentX(Component.LEFT_ALIGNMENT);
 
                 // Product Image
+                JPanel imagePanel = new JPanel(new BorderLayout());
+                imagePanel.setBackground(Color.WHITE);
                 JLabel imageLabel = new JLabel();
-                ImageIcon productImage = new ImageIcon("src\\stock.jpg"); // Path to the default image
+                ImageIcon productImage = new ImageIcon("src/stock.jpg");
                 Image scaledImage = productImage.getImage().getScaledInstance(100, 100, Image.SCALE_SMOOTH);
                 imageLabel.setIcon(new ImageIcon(scaledImage));
                 imageLabel.setHorizontalAlignment(SwingConstants.CENTER);
+                imagePanel.add(imageLabel, BorderLayout.CENTER);
+                imagePanel.setPreferredSize(new Dimension(120, 120));
 
                 // Text Information Panel
                 JPanel infoPanel = new JPanel();
                 infoPanel.setLayout(new BoxLayout(infoPanel, BoxLayout.Y_AXIS));
-                infoPanel.setBackground(new Color(248, 249, 250));
-                infoPanel.setBorder(BorderFactory.createEmptyBorder(5, 10, 5, 10)); // Padding inside info panel
+                infoPanel.setBackground(Color.WHITE);
+                infoPanel.setBorder(BorderFactory.createEmptyBorder(0, 10, 0, 10));
 
-                // Product Name
-                JLabel nameLabel = new JLabel("📦 " + product.getName());
-                nameLabel.setFont(new Font("Arial", Font.BOLD, 18));
-                nameLabel.setForeground(new Color(52, 58, 64));
+                // Product Name - with full width panel
+                JPanel namePanel = new JPanel(new BorderLayout());
+                namePanel.setBackground(Color.WHITE);
+                JLabel nameLabel = new JLabel(product.getName());
+                nameLabel.setFont(new Font("Arial", Font.BOLD, 16));
+                nameLabel.setForeground(new Color(33, 37, 41));
+                namePanel.add(nameLabel, BorderLayout.CENTER);
 
-                // Product Category
-                JLabel companyLabel = new JLabel("🏢 Company: " + product.getCategory());
-                companyLabel.setFont(new Font("Arial", Font.PLAIN, 14));
+                // Company and Price in one row
+                JPanel detailsPanel = new JPanel(new FlowLayout(FlowLayout.LEFT, 20, 0));
+                detailsPanel.setBackground(Color.WHITE);
+
+                JLabel companyLabel = new JLabel("Company: " + product.getCategory());
+                companyLabel.setFont(new Font("Arial", Font.PLAIN, 13));
                 companyLabel.setForeground(new Color(108, 117, 125));
 
-                // Product Price
-                JLabel priceLabel = new JLabel("💲 Price: $" + String.format("%.2f", product.getPrice()));
-                priceLabel.setFont(new Font("Arial", Font.BOLD, 16));
-                priceLabel.setForeground(new Color(40, 167, 69)); // Green
+                JLabel priceLabel = new JLabel("Price: $" + String.format("%.2f", product.getPrice()));
+                priceLabel.setFont(new Font("Arial", Font.BOLD, 15));
+                priceLabel.setForeground(new Color(40, 167, 69));
 
-                // Product Type
-                JLabel typeLabel = new JLabel("🛠️ Type: " + product.getSpecifications().get("Type"));
-                typeLabel.setFont(new Font("Arial", Font.PLAIN, 14));
+                detailsPanel.add(companyLabel);
+                detailsPanel.add(priceLabel);
+
+                // Type
+                JLabel typeLabel = new JLabel("Type: " + product.getSpecifications().get("Type"));
+                typeLabel.setFont(new Font("Arial", Font.PLAIN, 13));
                 typeLabel.setForeground(new Color(73, 80, 87));
 
-                // Features
-                JPanel featuresPanel = new JPanel();
-                featuresPanel.setLayout(new FlowLayout(FlowLayout.LEFT));
-                featuresPanel.setBackground(new Color(248, 249, 250));
+                // Features panel with pill-style labels
+                JPanel featuresPanel = new JPanel(new FlowLayout(FlowLayout.LEFT, 5, 0));
+                featuresPanel.setBackground(Color.WHITE);
                 for (String feature : product.getFeatures()) {
-                    JLabel featureLabel = new JLabel("✔️ " + feature);
-                    featureLabel.setFont(new Font("Arial", Font.ITALIC, 12));
-                    featureLabel.setForeground(Color.DARK_GRAY);
+                    JLabel featureLabel = new JLabel(feature);
+                    featureLabel.setFont(new Font("Arial", Font.PLAIN, 12));
+                    featureLabel.setForeground(new Color(73, 80, 87));
+                    featureLabel.setBorder(BorderFactory.createCompoundBorder(
+                            BorderFactory.createLineBorder(new Color(222, 226, 230), 1),
+                            BorderFactory.createEmptyBorder(3, 8, 3, 8)
+                    ));
+                    featureLabel.setBackground(new Color(248, 249, 250));
+                    featureLabel.setOpaque(true);
                     featuresPanel.add(featureLabel);
                 }
 
-                // Add elements to the info panel
-                infoPanel.add(nameLabel);
-                infoPanel.add(Box.createVerticalStrut(5));
-                infoPanel.add(companyLabel);
-                infoPanel.add(priceLabel);
+                // Add all components to info panel with proper spacing
+                infoPanel.add(namePanel);
+                infoPanel.add(Box.createVerticalStrut(8));
+                infoPanel.add(detailsPanel);
+                infoPanel.add(Box.createVerticalStrut(4));
                 infoPanel.add(typeLabel);
+                infoPanel.add(Box.createVerticalStrut(8));
                 infoPanel.add(featuresPanel);
 
-                // Add Image and Info Panel to Product Panel
-                productPanel.add(imageLabel, BorderLayout.WEST);
+                // Add panels to product panel
+                productPanel.add(imagePanel, BorderLayout.WEST);
                 productPanel.add(infoPanel, BorderLayout.CENTER);
 
-                // Add space between products
+                // Add to results panel with spacing
                 resultsPanel.add(productPanel);
                 resultsPanel.add(Box.createVerticalStrut(15));
             }
@@ -492,7 +671,9 @@ public class SearchPanel extends JPanel {
 
         // Add results to the result area
         resultArea.setLayout(new BorderLayout());
-        resultArea.add(new JScrollPane(resultsPanel), BorderLayout.CENTER);
+        JScrollPane scrollPane = new JScrollPane(resultsPanel);
+        scrollPane.getVerticalScrollBar().setUnitIncrement(16);
+        resultArea.add(scrollPane, BorderLayout.CENTER);
 
         // Refresh the UI
         resultArea.revalidate();

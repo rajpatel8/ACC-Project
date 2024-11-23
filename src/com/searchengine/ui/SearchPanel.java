@@ -9,6 +9,9 @@ import com.google.gson.JsonElement;
 
 import javax.swing.*;
 import javax.swing.Timer;
+import javax.swing.table.DefaultTableModel;
+import javax.swing.table.TableModel;
+import javax.swing.table.TableRowSorter;
 import java.awt.*;
 import java.awt.event.*;
 import java.nio.file.Files;
@@ -32,17 +35,21 @@ public class SearchPanel extends JPanel {
     private static final int SPELL_CHECK_DELAY = 500;
     private JList<SearchHistoryEntry> historyList;
     private DefaultListModel<SearchHistoryEntry> historyModel;
-    private List<SearchHistoryEntry> searchHistory;
+    private Map<String, SearchHistoryEntry> searchHistory; // Changed to Map for quick lookup
+    private JPanel frequencyPanel;
+    private DefaultTableModel frequencyModel;
+    private JTable frequencyTable;
 
-    // Add this to your existing class fields
     private void addHistoryPanel() {
         // Create history panel
         JPanel historyPanel = new JPanel(new BorderLayout());
         historyPanel.setPreferredSize(new Dimension(250, getHeight()));
-        historyPanel.setBorder(BorderFactory.createTitledBorder("Search History"));
+
+        // Create tabbed pane for history and frequency
+        JTabbedPane tabbedPane = new JTabbedPane();
 
         // Initialize history components
-        searchHistory = new ArrayList<>();
+        searchHistory = new HashMap<>();
         historyModel = new DefaultListModel<>();
         historyList = new JList<>(historyModel);
 
@@ -52,9 +59,12 @@ public class SearchPanel extends JPanel {
             public Component getListCellRendererComponent(JList<?> list, Object value,
                                                           int index, boolean isSelected, boolean cellHasFocus) {
                 SearchHistoryEntry entry = (SearchHistoryEntry) value;
-                String displayText = String.format("<html><b>%s</b><br><small>%s</small></html>",
+                String displayText = String.format("<html><b>%s</b><br>" +
+                                "<small>Last: %s</small><br>" +
+                                "<small>Frequency: %d times</small></html>",
                         entry.getQuery(),
-                        entry.getTimestamp());
+                        entry.getLastSearchTime(),
+                        entry.getFrequency());
 
                 JLabel label = (JLabel) super.getListCellRendererComponent(
                         list, displayText, index, isSelected, cellHasFocus);
@@ -77,60 +87,121 @@ public class SearchPanel extends JPanel {
             }
         });
 
-        // Create control panel for history
+        // Create history control panel
         JPanel historyControlPanel = new JPanel(new FlowLayout(FlowLayout.LEFT));
         JButton clearButton = new JButton("Clear History");
         clearButton.addActionListener(e -> clearHistory());
         historyControlPanel.add(clearButton);
 
-        // Add components to history panel
-        historyPanel.add(new JScrollPane(historyList), BorderLayout.CENTER);
-        historyPanel.add(historyControlPanel, BorderLayout.SOUTH);
+        // Create history tab
+        JPanel historyTab = new JPanel(new BorderLayout());
+        historyTab.add(new JScrollPane(historyList), BorderLayout.CENTER);
+        historyTab.add(historyControlPanel, BorderLayout.SOUTH);
+
+        // Create frequency table
+        String[] columns = {"Search Term", "Frequency", "Last Search"};
+        frequencyModel = new DefaultTableModel(columns, 0) {
+            @Override
+            public boolean isCellEditable(int row, int column) {
+                return false;
+            }
+        };
+        frequencyTable = new JTable(frequencyModel);
+        frequencyTable.setFillsViewportHeight(true);
+
+        // Set column widths
+        frequencyTable.getColumnModel().getColumn(0).setPreferredWidth(120);
+        frequencyTable.getColumnModel().getColumn(1).setPreferredWidth(80);
+        frequencyTable.getColumnModel().getColumn(2).setPreferredWidth(150);
+
+        // Sort by frequency
+        frequencyTable.setAutoCreateRowSorter(true);
+        TableRowSorter<TableModel> sorter = new TableRowSorter<>(frequencyTable.getModel());
+        frequencyTable.setRowSorter(sorter);
+        // Sort by frequency (column 1) in descending order by default
+        List<RowSorter.SortKey> sortKeys = new ArrayList<>();
+        sortKeys.add(new RowSorter.SortKey(1, SortOrder.DESCENDING));
+        sorter.setSortKeys(sortKeys);
+
+        // Create frequency tab
+        JPanel frequencyTab = new JPanel(new BorderLayout());
+        frequencyTab.add(new JScrollPane(frequencyTable), BorderLayout.CENTER);
+
+        // Add tabs to tabbed pane
+        tabbedPane.addTab("History", historyTab);
+        tabbedPane.addTab("Frequency", frequencyTab);
+
+        // Add tabbed pane to history panel
+        historyPanel.add(tabbedPane, BorderLayout.CENTER);
 
         // Add history panel to the main panel
         add(historyPanel, BorderLayout.EAST);
     }
 
-    // Add this method to clear history
     private void clearHistory() {
         historyModel.clear();
         searchHistory.clear();
+        frequencyModel.setRowCount(0);
     }
 
-    // Add this method to add a search to history
     private void addToHistory(String query) {
-        SearchHistoryEntry entry = new SearchHistoryEntry(query);
-        searchHistory.add(0, entry);  // Add to beginning of list
-        updateHistoryModel();
+        query = query.toLowerCase().trim();
+        SearchHistoryEntry entry = searchHistory.get(query);
 
-        // Limit history size to 50 entries
-        if (searchHistory.size() > 50) {
-            searchHistory.remove(searchHistory.size() - 1);
-            updateHistoryModel();
+        if (entry == null) {
+            // New search term
+            entry = new SearchHistoryEntry(query);
+            searchHistory.put(query, entry);
+        } else {
+            // Existing search term - update frequency and time
+            entry.incrementFrequency();
+            entry.updateLastSearchTime();
         }
+
+        updateHistoryDisplay();
     }
 
-    // Update the history model
-    private void updateHistoryModel() {
+    private void updateHistoryDisplay() {
+        // Update history list
         historyModel.clear();
-        for (SearchHistoryEntry entry : searchHistory) {
-            historyModel.addElement(entry);
-        }
+        searchHistory.values().stream()
+                .sorted(Comparator.comparing(SearchHistoryEntry::getLastSearchTime).reversed())
+                .forEach(historyModel::addElement);
+
+        // Update frequency table
+        frequencyModel.setRowCount(0);
+        searchHistory.values().stream()
+                .sorted(Comparator.comparing(SearchHistoryEntry::getFrequency).reversed())
+                .forEach(entry -> frequencyModel.addRow(new Object[]{
+                        entry.getQuery(),
+                        entry.getFrequency(),
+                        entry.getLastSearchTime()
+                }));
     }
 
-    // Create a class to represent history entries
     private static class SearchHistoryEntry {
         private final String query;
-        private final String timestamp;
+        private int frequency;
+        private String lastSearchTime;
 
         public SearchHistoryEntry(String query) {
             this.query = query;
-            this.timestamp = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss")
+            this.frequency = 1;
+            updateLastSearchTime();
+        }
+
+        public void incrementFrequency() {
+            this.frequency++;
+        }
+
+        public void updateLastSearchTime() {
+            this.lastSearchTime = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss")
                     .format(new Date());
         }
 
         public String getQuery() { return query; }
-        public String getTimestamp() { return timestamp; }
+        public int getFrequency() { return frequency; }
+        public String getLastSearchTime() { return lastSearchTime; }
 
         @Override
         public String toString() {
@@ -151,7 +222,6 @@ public class SearchPanel extends JPanel {
         addFilterPanel();
         addHistoryPanel();
     }
-
 
     private void addFilterPanel() {
         // Create filter panel

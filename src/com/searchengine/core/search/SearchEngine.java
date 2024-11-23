@@ -24,35 +24,6 @@ public class SearchEngine {
     private final PatternMatcher patternMatcher;
     private final List<Product> products;
     private final ExecutorService executorService;
-//    public SearchResult search(String query) {
-//        SearchResult result = new SearchResult();
-//
-//        // Check spelling
-//        if (!spellChecker.isWordValid(query)) {
-//            result.addSpellingSuggestions(spellChecker.getSuggestions(query));
-//        }
-//
-//        // Get word completions
-//        result.setCompletions(wordCompletion.getSuggestions(query));
-//
-//        // Search using inverted index
-//        var searchResults = invertedIndex.search(query);
-//        result.setIndexResults(searchResults.getItems());
-//
-//        // Apply page ranking
-//        var rankedResults = pageRanker.rankProducts(
-//                searchResults.getItems().stream()
-//                        .map(item -> item.getProduct())
-//                        .toList(),
-//                query
-//        );
-//        result.setRankedResults(rankedResults);
-//
-//        // Record search frequency
-//        frequencyAnalyzer.recordSearch(query);
-//
-//        return result;
-//    }
 
     public SearchEngine() {
 
@@ -113,13 +84,12 @@ public class SearchEngine {
         // Get word completions
         result.setCompletions(wordCompletion.getSuggestions(query));
 
-        // Search using inverted index
-        var indexResults = invertedIndex.search(query).getItems();
-        result.setIndexResults(indexResults);
+        var indexResults = invertedIndex.search(query);
+        result.setIndexResults(indexResults.getItems());
 
-        // Apply page ranking
+        // Apply enhanced page ranking
         var rankedResults = pageRanker.rankProducts(
-                indexResults.stream()
+                indexResults.getItems().stream()
                         .map(item -> item.getProduct())
                         .toList(),
                 query

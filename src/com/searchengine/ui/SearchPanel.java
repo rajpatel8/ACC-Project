@@ -13,6 +13,7 @@ import java.awt.*;
 import java.awt.event.*;
 import java.nio.file.Files;
 import java.nio.file.Paths;
+import java.text.SimpleDateFormat;
 import java.util.*;
 import java.util.List;
 import java.util.stream.Collectors;
@@ -29,6 +30,114 @@ public class SearchPanel extends JPanel {
     private JLabel spellCheckLabel;
     private Timer spellCheckTimer;
     private static final int SPELL_CHECK_DELAY = 500;
+    private JList<SearchHistoryEntry> historyList;
+    private DefaultListModel<SearchHistoryEntry> historyModel;
+    private List<SearchHistoryEntry> searchHistory;
+
+    // Add this to your existing class fields
+    private void addHistoryPanel() {
+        // Create history panel
+        JPanel historyPanel = new JPanel(new BorderLayout());
+        historyPanel.setPreferredSize(new Dimension(250, getHeight()));
+        historyPanel.setBorder(BorderFactory.createTitledBorder("Search History"));
+
+        // Initialize history components
+        searchHistory = new ArrayList<>();
+        historyModel = new DefaultListModel<>();
+        historyList = new JList<>(historyModel);
+
+        // Custom cell renderer for history items
+        historyList.setCellRenderer(new DefaultListCellRenderer() {
+            @Override
+            public Component getListCellRendererComponent(JList<?> list, Object value,
+                                                          int index, boolean isSelected, boolean cellHasFocus) {
+                SearchHistoryEntry entry = (SearchHistoryEntry) value;
+                String displayText = String.format("<html><b>%s</b><br><small>%s</small></html>",
+                        entry.getQuery(),
+                        entry.getTimestamp());
+
+                JLabel label = (JLabel) super.getListCellRendererComponent(
+                        list, displayText, index, isSelected, cellHasFocus);
+                label.setBorder(BorderFactory.createEmptyBorder(5, 5, 5, 5));
+                return label;
+            }
+        });
+
+        // Add mouse listener for history items
+        historyList.addMouseListener(new MouseAdapter() {
+            @Override
+            public void mouseClicked(MouseEvent e) {
+                if (e.getClickCount() == 2) {  // Double click
+                    SearchHistoryEntry selected = historyList.getSelectedValue();
+                    if (selected != null) {
+                        searchField.setText(selected.getQuery());
+                        performSearch();
+                    }
+                }
+            }
+        });
+
+        // Create control panel for history
+        JPanel historyControlPanel = new JPanel(new FlowLayout(FlowLayout.LEFT));
+        JButton clearButton = new JButton("Clear History");
+        clearButton.addActionListener(e -> clearHistory());
+        historyControlPanel.add(clearButton);
+
+        // Add components to history panel
+        historyPanel.add(new JScrollPane(historyList), BorderLayout.CENTER);
+        historyPanel.add(historyControlPanel, BorderLayout.SOUTH);
+
+        // Add history panel to the main panel
+        add(historyPanel, BorderLayout.EAST);
+    }
+
+    // Add this method to clear history
+    private void clearHistory() {
+        historyModel.clear();
+        searchHistory.clear();
+    }
+
+    // Add this method to add a search to history
+    private void addToHistory(String query) {
+        SearchHistoryEntry entry = new SearchHistoryEntry(query);
+        searchHistory.add(0, entry);  // Add to beginning of list
+        updateHistoryModel();
+
+        // Limit history size to 50 entries
+        if (searchHistory.size() > 50) {
+            searchHistory.remove(searchHistory.size() - 1);
+            updateHistoryModel();
+        }
+    }
+
+    // Update the history model
+    private void updateHistoryModel() {
+        historyModel.clear();
+        for (SearchHistoryEntry entry : searchHistory) {
+            historyModel.addElement(entry);
+        }
+    }
+
+    // Create a class to represent history entries
+    private static class SearchHistoryEntry {
+        private final String query;
+        private final String timestamp;
+
+        public SearchHistoryEntry(String query) {
+            this.query = query;
+            this.timestamp = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss")
+                    .format(new Date());
+        }
+
+        public String getQuery() { return query; }
+        public String getTimestamp() { return timestamp; }
+
+        @Override
+        public String toString() {
+            return query;
+        }
+    }
+
 
     public SearchPanel(SearchEngine searchEngine) {
         this.searchEngine = searchEngine;
@@ -40,7 +149,9 @@ public class SearchPanel extends JPanel {
         initializeUI();
         loadProductData();
         addFilterPanel();
+        addHistoryPanel();
     }
+
 
     private void addFilterPanel() {
         // Create filter panel
@@ -201,13 +312,13 @@ public class SearchPanel extends JPanel {
 
         // Search panel with spell check and autocomplete
         JPanel searchPanel = new JPanel(new BorderLayout(5, 5));
-        
+
         // Create search field panel
         JPanel searchFieldPanel = new JPanel(new BorderLayout(5, 5));
         searchField = new JTextField();
         JButton searchButton = new JButton("Search");
         searchButton.addActionListener(e -> performSearch());
-        
+
         // Add spell check label
         spellCheckLabel = new JLabel();
         spellCheckLabel.setForeground(Color.RED);
@@ -235,14 +346,14 @@ public class SearchPanel extends JPanel {
 
         // Add document listener for search field
         searchField.getDocument().addDocumentListener(new javax.swing.event.DocumentListener() {
-            public void changedUpdate(javax.swing.event.DocumentEvent e) { 
-                updateSuggestionsAndSpellCheck(); 
+            public void changedUpdate(javax.swing.event.DocumentEvent e) {
+                updateSuggestionsAndSpellCheck();
             }
-            public void removeUpdate(javax.swing.event.DocumentEvent e) { 
-                updateSuggestionsAndSpellCheck(); 
+            public void removeUpdate(javax.swing.event.DocumentEvent e) {
+                updateSuggestionsAndSpellCheck();
             }
-            public void insertUpdate(javax.swing.event.DocumentEvent e) { 
-                updateSuggestionsAndSpellCheck(); 
+            public void insertUpdate(javax.swing.event.DocumentEvent e) {
+                updateSuggestionsAndSpellCheck();
             }
         });
 
@@ -317,7 +428,7 @@ public class SearchPanel extends JPanel {
     private void updateSuggestionsAndSpellCheck() {
         // Reset spell check timer
         spellCheckTimer.restart();
-        
+
         // Update suggestions
         updateSuggestions();
     }
@@ -329,7 +440,7 @@ public class SearchPanel extends JPanel {
             String[] words = text.toLowerCase().split("\\s+");
             List<String> misspelledWords = new ArrayList<>();
             Map<String, List<String>> suggestions = new HashMap<>();
-            
+
             // Check each word
             for (String word : words) {
                 if (!searchEngine.getSpellChecker().isWordValid(word)) {
@@ -337,7 +448,7 @@ public class SearchPanel extends JPanel {
                     suggestions.put(word, searchEngine.getSpellChecker().getSuggestions(word));
                 }
             }
-            
+
             // If there are misspelled words, show suggestions
             if (!misspelledWords.isEmpty()) {
                 StringBuilder suggestionText = new StringBuilder("<html>Did you mean: ");
@@ -420,10 +531,10 @@ public class SearchPanel extends JPanel {
 
             // Initialize word completion
             wordCompletion.buildTrie(products);
-            
+
             // Initialize spell checker with product data
             initializeSpellChecker(products);
-            
+
             System.out.println("Loaded " + products.size() + " products");
 
         } catch (Exception e) {
@@ -435,31 +546,31 @@ public class SearchPanel extends JPanel {
     private void initializeSpellChecker(List<Product> products) {
         // Build vocabulary from product data
         Set<String> vocabulary = new HashSet<>();
-        
+
         for (Product product : products) {
             // Add words from product name
             addWordsToVocabulary(product.getName(), vocabulary);
-            
+
             // Add words from features
             for (String feature : product.getFeatures()) {
                 addWordsToVocabulary(feature, vocabulary);
             }
-            
+
             // Add words from specifications
             for (Map.Entry<String, String> spec : product.getSpecifications().entrySet()) {
                 addWordsToVocabulary(spec.getValue(), vocabulary);
             }
-            
+
             // Add category
             addWordsToVocabulary(product.getCategory(), vocabulary);
         }
 
         // Add common audio/technology terms
         String[] commonTerms = {
-            "wireless", "bluetooth", "speaker", "soundbar", "subwoofer",
-            "surround", "dolby", "atmos", "bass", "treble", "audio",
-            "digital", "optical", "hdmi", "remote", "control", "power",
-            "watts", "channels", "configuration", "system"
+                "wireless", "bluetooth", "speaker", "soundbar", "subwoofer",
+                "surround", "dolby", "atmos", "bass", "treble", "audio",
+                "digital", "optical", "hdmi", "remote", "control", "power",
+                "watts", "channels", "configuration", "system"
         };
         Collections.addAll(vocabulary, commonTerms);
 
@@ -470,12 +581,12 @@ public class SearchPanel extends JPanel {
 
     private void addWordsToVocabulary(String text, Set<String> vocabulary) {
         if (text == null) return;
-        
+
         // Split text into words and clean
         String[] words = text.toLowerCase()
                 .replaceAll("[^a-z0-9\\s-]", " ")
                 .split("\\s+");
-        
+
         for (String word : words) {
             if (word.length() > 2) { // Skip very short words
                 vocabulary.add(word);
@@ -502,6 +613,7 @@ public class SearchPanel extends JPanel {
             return;
         }
 
+        addToHistory(query);
         List<Product> results = searchProducts(query);
         displayResults(results);
     }
@@ -560,8 +672,6 @@ public class SearchPanel extends JPanel {
         JPanel resultsPanel = new JPanel();
         resultsPanel.setLayout(new BoxLayout(resultsPanel, BoxLayout.Y_AXIS));
         resultsPanel.setBackground(Color.WHITE);
-        // Add padding around the panel
-        resultsPanel.setBorder(BorderFactory.createEmptyBorder(10, 10, 10, 10));
 
         if (results.isEmpty()) {
             JLabel noResultsLabel = new JLabel("No products found matching your search.");
@@ -572,98 +682,79 @@ public class SearchPanel extends JPanel {
         } else {
             JLabel resultsHeader = new JLabel("🔍 Found " + results.size() + " products:");
             resultsHeader.setFont(new Font("Arial", Font.BOLD, 20));
-            resultsHeader.setForeground(new Color(0, 123, 255));
+            resultsHeader.setForeground(new Color(0, 123, 255)); // Blue color
             resultsHeader.setAlignmentX(Component.LEFT_ALIGNMENT);
             resultsPanel.add(resultsHeader);
-            resultsPanel.add(Box.createVerticalStrut(15));
+            resultsPanel.add(Box.createVerticalStrut(15)); // Add space below header
 
             for (Product product : results) {
                 JPanel productPanel = new JPanel();
-                productPanel.setLayout(new BorderLayout(10, 0)); // Add horizontal gap
+                productPanel.setLayout(new BorderLayout());
                 productPanel.setBorder(BorderFactory.createCompoundBorder(
-                        BorderFactory.createLineBorder(new Color(200, 200, 200), 1),
-                        BorderFactory.createEmptyBorder(15, 15, 15, 15)
+                        BorderFactory.createLineBorder(new Color(200, 200, 200), 2, true),
+                        BorderFactory.createEmptyBorder(10, 10, 10, 10) // Add padding
                 ));
-                productPanel.setBackground(Color.WHITE);
-                productPanel.setMaximumSize(new Dimension(1200, 180)); // Increased width
-                productPanel.setPreferredSize(new Dimension(1000, 180));
+                productPanel.setBackground(new Color(248, 249, 250)); // Light gray
+                productPanel.setMaximumSize(new Dimension(600, 250));
                 productPanel.setAlignmentX(Component.LEFT_ALIGNMENT);
 
                 // Product Image
-                JPanel imagePanel = new JPanel(new BorderLayout());
-                imagePanel.setBackground(Color.WHITE);
                 JLabel imageLabel = new JLabel();
-                ImageIcon productImage = new ImageIcon("src/stock.jpg");
+                ImageIcon productImage = new ImageIcon("src/stock.jpg"); // Path to the default image
                 Image scaledImage = productImage.getImage().getScaledInstance(100, 100, Image.SCALE_SMOOTH);
                 imageLabel.setIcon(new ImageIcon(scaledImage));
                 imageLabel.setHorizontalAlignment(SwingConstants.CENTER);
-                imagePanel.add(imageLabel, BorderLayout.CENTER);
-                imagePanel.setPreferredSize(new Dimension(120, 120));
 
                 // Text Information Panel
                 JPanel infoPanel = new JPanel();
                 infoPanel.setLayout(new BoxLayout(infoPanel, BoxLayout.Y_AXIS));
-                infoPanel.setBackground(Color.WHITE);
-                infoPanel.setBorder(BorderFactory.createEmptyBorder(0, 10, 0, 10));
+                infoPanel.setBackground(new Color(248, 249, 250));
+                infoPanel.setBorder(BorderFactory.createEmptyBorder(5, 10, 5, 10)); // Padding inside info panel
 
-                // Product Name - with full width panel
-                JPanel namePanel = new JPanel(new BorderLayout());
-                namePanel.setBackground(Color.WHITE);
-                JLabel nameLabel = new JLabel(product.getName());
-                nameLabel.setFont(new Font("Arial", Font.BOLD, 16));
-                nameLabel.setForeground(new Color(33, 37, 41));
-                namePanel.add(nameLabel, BorderLayout.CENTER);
+                // Product Name
+                JLabel nameLabel = new JLabel("📦 " + product.getName());
+                nameLabel.setFont(new Font("Arial", Font.BOLD, 18));
+                nameLabel.setForeground(new Color(52, 58, 64));
 
-                // Company and Price in one row
-                JPanel detailsPanel = new JPanel(new FlowLayout(FlowLayout.LEFT, 20, 0));
-                detailsPanel.setBackground(Color.WHITE);
-
-                JLabel companyLabel = new JLabel("Company: " + product.getCategory());
-                companyLabel.setFont(new Font("Arial", Font.PLAIN, 13));
+                // Product Category
+                JLabel companyLabel = new JLabel("🏢 Company: " + product.getCategory());
+                companyLabel.setFont(new Font("Arial", Font.PLAIN, 14));
                 companyLabel.setForeground(new Color(108, 117, 125));
 
-                JLabel priceLabel = new JLabel("Price: $" + String.format("%.2f", product.getPrice()));
-                priceLabel.setFont(new Font("Arial", Font.BOLD, 15));
-                priceLabel.setForeground(new Color(40, 167, 69));
+                // Product Price
+                JLabel priceLabel = new JLabel("💲 Price: $" + String.format("%.2f", product.getPrice()));
+                priceLabel.setFont(new Font("Arial", Font.BOLD, 16));
+                priceLabel.setForeground(new Color(40, 167, 69)); // Green
 
-                detailsPanel.add(companyLabel);
-                detailsPanel.add(priceLabel);
-
-                // Type
-                JLabel typeLabel = new JLabel("Type: " + product.getSpecifications().get("Type"));
-                typeLabel.setFont(new Font("Arial", Font.PLAIN, 13));
+                // Product Type
+                JLabel typeLabel = new JLabel("🛠️ Type: " + product.getSpecifications().get("Type"));
+                typeLabel.setFont(new Font("Arial", Font.PLAIN, 14));
                 typeLabel.setForeground(new Color(73, 80, 87));
 
-                // Features panel with pill-style labels
-                JPanel featuresPanel = new JPanel(new FlowLayout(FlowLayout.LEFT, 5, 0));
-                featuresPanel.setBackground(Color.WHITE);
+                // Features
+                JPanel featuresPanel = new JPanel();
+                featuresPanel.setLayout(new FlowLayout(FlowLayout.LEFT));
+                featuresPanel.setBackground(new Color(248, 249, 250));
                 for (String feature : product.getFeatures()) {
-                    JLabel featureLabel = new JLabel(feature);
-                    featureLabel.setFont(new Font("Arial", Font.PLAIN, 12));
-                    featureLabel.setForeground(new Color(73, 80, 87));
-                    featureLabel.setBorder(BorderFactory.createCompoundBorder(
-                            BorderFactory.createLineBorder(new Color(222, 226, 230), 1),
-                            BorderFactory.createEmptyBorder(3, 8, 3, 8)
-                    ));
-                    featureLabel.setBackground(new Color(248, 249, 250));
-                    featureLabel.setOpaque(true);
+                    JLabel featureLabel = new JLabel("✔️ " + feature);
+                    featureLabel.setFont(new Font("Arial", Font.ITALIC, 12));
+                    featureLabel.setForeground(Color.DARK_GRAY);
                     featuresPanel.add(featureLabel);
                 }
 
-                // Add all components to info panel with proper spacing
-                infoPanel.add(namePanel);
-                infoPanel.add(Box.createVerticalStrut(8));
-                infoPanel.add(detailsPanel);
-                infoPanel.add(Box.createVerticalStrut(4));
+                // Add elements to the info panel
+                infoPanel.add(nameLabel);
+                infoPanel.add(Box.createVerticalStrut(5));
+                infoPanel.add(companyLabel);
+                infoPanel.add(priceLabel);
                 infoPanel.add(typeLabel);
-                infoPanel.add(Box.createVerticalStrut(8));
                 infoPanel.add(featuresPanel);
 
-                // Add panels to product panel
-                productPanel.add(imagePanel, BorderLayout.WEST);
+                // Add Image and Info Panel to Product Panel
+                productPanel.add(imageLabel, BorderLayout.WEST);
                 productPanel.add(infoPanel, BorderLayout.CENTER);
 
-                // Add to results panel with spacing
+                // Add space between products
                 resultsPanel.add(productPanel);
                 resultsPanel.add(Box.createVerticalStrut(15));
             }
@@ -671,9 +762,7 @@ public class SearchPanel extends JPanel {
 
         // Add results to the result area
         resultArea.setLayout(new BorderLayout());
-        JScrollPane scrollPane = new JScrollPane(resultsPanel);
-        scrollPane.getVerticalScrollBar().setUnitIncrement(16);
-        resultArea.add(scrollPane, BorderLayout.CENTER);
+        resultArea.add(new JScrollPane(resultsPanel), BorderLayout.CENTER);
 
         // Refresh the UI
         resultArea.revalidate();

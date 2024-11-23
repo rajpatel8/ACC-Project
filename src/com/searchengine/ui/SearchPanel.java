@@ -25,6 +25,9 @@ public class SearchPanel extends JPanel {
     private DefaultListModel<String> suggestionsModel;
     private JWindow suggestionsWindow;
     private List<Product> products;
+    private JLabel spellCheckLabel;
+    private Timer spellCheckTimer;
+    private static final int SPELL_CHECK_DELAY = 500;
 
     public SearchPanel(SearchEngine searchEngine) {
         this.searchEngine = searchEngine;
@@ -38,11 +41,23 @@ public class SearchPanel extends JPanel {
         setLayout(new BorderLayout(5, 5));
         setBorder(BorderFactory.createEmptyBorder(10, 10, 10, 10));
 
-        // Search panel with autocomplete
+        // Search panel with spell check and autocomplete
         JPanel searchPanel = new JPanel(new BorderLayout(5, 5));
+        
+        // Create search field panel
+        JPanel searchFieldPanel = new JPanel(new BorderLayout(5, 5));
         searchField = new JTextField();
         JButton searchButton = new JButton("Search");
         searchButton.addActionListener(e -> performSearch());
+        
+        // Add spell check label
+        spellCheckLabel = new JLabel();
+        spellCheckLabel.setForeground(Color.RED);
+        spellCheckLabel.setVisible(false);
+
+        searchFieldPanel.add(searchField, BorderLayout.CENTER);
+        searchFieldPanel.add(searchButton, BorderLayout.EAST);
+        searchFieldPanel.add(spellCheckLabel, BorderLayout.SOUTH);
 
         // Setup suggestions
         suggestionsModel = new DefaultListModel<>();
@@ -56,11 +71,21 @@ public class SearchPanel extends JPanel {
         suggestionsWindow.add(suggestionsScroll);
         suggestionsWindow.setSize(300, 200);
 
+        // Initialize spell check timer
+        spellCheckTimer = new Timer(SPELL_CHECK_DELAY, e -> performSpellCheck());
+        spellCheckTimer.setRepeats(false);
+
         // Add document listener for search field
         searchField.getDocument().addDocumentListener(new javax.swing.event.DocumentListener() {
-            public void changedUpdate(javax.swing.event.DocumentEvent e) { updateSuggestions(); }
-            public void removeUpdate(javax.swing.event.DocumentEvent e) { updateSuggestions(); }
-            public void insertUpdate(javax.swing.event.DocumentEvent e) { updateSuggestions(); }
+            public void changedUpdate(javax.swing.event.DocumentEvent e) { 
+                updateSuggestionsAndSpellCheck(); 
+            }
+            public void removeUpdate(javax.swing.event.DocumentEvent e) { 
+                updateSuggestionsAndSpellCheck(); 
+            }
+            public void insertUpdate(javax.swing.event.DocumentEvent e) { 
+                updateSuggestionsAndSpellCheck(); 
+            }
         });
 
         // Handle key events
@@ -102,11 +127,10 @@ public class SearchPanel extends JPanel {
             }
         });
 
-        // Add focus listener to hide suggestions
+        // Add focus listener
         searchField.addFocusListener(new FocusAdapter() {
             @Override
             public void focusLost(FocusEvent e) {
-                // Don't hide if focus is going to suggestions list
                 if (e.getOppositeComponent() != suggestionsList) {
                     Timer timer = new Timer(200, evt -> {
                         if (!suggestionsList.hasFocus()) {
@@ -119,8 +143,7 @@ public class SearchPanel extends JPanel {
             }
         });
 
-        searchPanel.add(searchField, BorderLayout.CENTER);
-        searchPanel.add(searchButton, BorderLayout.EAST);
+        searchPanel.add(searchFieldPanel, BorderLayout.NORTH);
 
         // Results area
         resultArea = new JTextArea();
@@ -133,6 +156,49 @@ public class SearchPanel extends JPanel {
         add(resultScroll, BorderLayout.CENTER);
     }
 
+    private void updateSuggestionsAndSpellCheck() {
+        // Reset spell check timer
+        spellCheckTimer.restart();
+        
+        // Update suggestions
+        updateSuggestions();
+    }
+
+    private void performSpellCheck() {
+        String text = searchField.getText().trim();
+        if (!text.isEmpty()) {
+            // Split the search query into words
+            String[] words = text.toLowerCase().split("\\s+");
+            List<String> misspelledWords = new ArrayList<>();
+            Map<String, List<String>> suggestions = new HashMap<>();
+            
+            // Check each word
+            for (String word : words) {
+                if (!searchEngine.getSpellChecker().isWordValid(word)) {
+                    misspelledWords.add(word);
+                    suggestions.put(word, searchEngine.getSpellChecker().getSuggestions(word));
+                }
+            }
+            
+            // If there are misspelled words, show suggestions
+            if (!misspelledWords.isEmpty()) {
+                StringBuilder suggestionText = new StringBuilder("<html>Did you mean: ");
+                for (int i = 0; i < misspelledWords.size(); i++) {
+                    String word = misspelledWords.get(i);
+                    List<String> wordSuggestions = suggestions.get(word);
+                    if (!wordSuggestions.isEmpty()) {
+                        if (i > 0) suggestionText.append(", ");
+                        suggestionText.append("<b>").append(wordSuggestions.get(0)).append("</b>");
+                    }
+                }
+                suggestionText.append("?</html>");
+                spellCheckLabel.setText(suggestionText.toString());
+                spellCheckLabel.setVisible(true);
+                return;
+            }
+        }
+        spellCheckLabel.setVisible(false);
+    }
 
     private void showSuggestions(String prefix) {
         List<WordCompletion.Suggestion> suggestions = wordCompletion.getSuggestions(prefix);
@@ -196,11 +262,66 @@ public class SearchPanel extends JPanel {
 
             // Initialize word completion
             wordCompletion.buildTrie(products);
+            
+            // Initialize spell checker with product data
+            initializeSpellChecker(products);
+            
             System.out.println("Loaded " + products.size() + " products");
 
         } catch (Exception e) {
             System.err.println("Error loading product data: " + e.getMessage());
             e.printStackTrace();
+        }
+    }
+
+    private void initializeSpellChecker(List<Product> products) {
+        // Build vocabulary from product data
+        Set<String> vocabulary = new HashSet<>();
+        
+        for (Product product : products) {
+            // Add words from product name
+            addWordsToVocabulary(product.getName(), vocabulary);
+            
+            // Add words from features
+            for (String feature : product.getFeatures()) {
+                addWordsToVocabulary(feature, vocabulary);
+            }
+            
+            // Add words from specifications
+            for (Map.Entry<String, String> spec : product.getSpecifications().entrySet()) {
+                addWordsToVocabulary(spec.getValue(), vocabulary);
+            }
+            
+            // Add category
+            addWordsToVocabulary(product.getCategory(), vocabulary);
+        }
+
+        // Add common audio/technology terms
+        String[] commonTerms = {
+            "wireless", "bluetooth", "speaker", "soundbar", "subwoofer",
+            "surround", "dolby", "atmos", "bass", "treble", "audio",
+            "digital", "optical", "hdmi", "remote", "control", "power",
+            "watts", "channels", "configuration", "system"
+        };
+        Collections.addAll(vocabulary, commonTerms);
+
+        // Build the spell checker vocabulary through SearchEngine
+        searchEngine.getSpellChecker().buildVocabulary(products);
+        System.out.println("Spell checker initialized with vocabulary size: " + vocabulary.size());
+    }
+
+    private void addWordsToVocabulary(String text, Set<String> vocabulary) {
+        if (text == null) return;
+        
+        // Split text into words and clean
+        String[] words = text.toLowerCase()
+                .replaceAll("[^a-z0-9\\s-]", " ")
+                .split("\\s+");
+        
+        for (String word : words) {
+            if (word.length() > 2) { // Skip very short words
+                vocabulary.add(word);
+            }
         }
     }
 
@@ -309,7 +430,7 @@ public class SearchPanel extends JPanel {
 
                 // Product Image
                 JLabel imageLabel = new JLabel();
-                ImageIcon productImage = new ImageIcon("/Users/lord_rajkumar/Desktop/Project/ACC/src/stock.jpg"); // Path to the default image
+                ImageIcon productImage = new ImageIcon("src\\stock.jpg"); // Path to the default image
                 Image scaledImage = productImage.getImage().getScaledInstance(100, 100, Image.SCALE_SMOOTH);
                 imageLabel.setIcon(new ImageIcon(scaledImage));
                 imageLabel.setHorizontalAlignment(SwingConstants.CENTER);

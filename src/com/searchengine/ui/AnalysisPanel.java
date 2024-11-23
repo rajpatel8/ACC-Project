@@ -49,7 +49,7 @@ public class AnalysisPanel extends JPanel {
         // Create main tabbed pane
         tabbedPane = new JTabbedPane();
 
-        // Add word frequency tab
+        // Add word frequency tab with all frequency analysis
         tabbedPane.addTab("Word Frequencies", createFrequencyPanel());
 
         // Add patterns tab
@@ -58,18 +58,19 @@ public class AnalysisPanel extends JPanel {
         // Add statistics tab
         tabbedPane.addTab("Statistics", createStatsPanel());
 
-        // Add attribute analysis tabs
-        createAttributeTables();
-
         // Add control panel
         add(createControlPanel(), BorderLayout.NORTH);
         add(tabbedPane, BorderLayout.CENTER);
     }
 
     private JPanel createFrequencyPanel() {
-        JPanel panel = new JPanel(new BorderLayout());
+        JPanel mainPanel = new JPanel(new BorderLayout());
 
-        // Create frequency table
+        // Create tabbed pane for frequency analyses with tabs at the top (center)
+        JTabbedPane frequencyTabs = new JTabbedPane(JTabbedPane.TOP);
+
+        // Add word frequency tab
+        JPanel wordFreqPanel = new JPanel(new BorderLayout());
         String[] columns = {"Word", "Frequency", "Products"};
         frequencyModel = new DefaultTableModel(columns, 0) {
             @Override
@@ -80,7 +81,7 @@ public class AnalysisPanel extends JPanel {
         frequencyTable = new JTable(frequencyModel);
         frequencyTable.setAutoCreateRowSorter(true);
 
-        // Add sorting controls
+        // Add sorting controls for word frequency
         JPanel controlPanel = new JPanel(new FlowLayout(FlowLayout.LEFT));
         JComboBox<String> sortBox = new JComboBox<>(new String[]{
                 "Sort by Frequency",
@@ -90,10 +91,19 @@ public class AnalysisPanel extends JPanel {
         sortBox.addActionListener(e -> sortFrequencyTable(sortBox.getSelectedIndex()));
         controlPanel.add(sortBox);
 
-        panel.add(controlPanel, BorderLayout.NORTH);
-        panel.add(new JScrollPane(frequencyTable), BorderLayout.CENTER);
+        wordFreqPanel.add(controlPanel, BorderLayout.NORTH);
+        wordFreqPanel.add(new JScrollPane(frequencyTable), BorderLayout.CENTER);
+        frequencyTabs.addTab("Word Frequency", wordFreqPanel);
 
-        return panel;
+        // Add attribute analysis tabs
+        createAttributeTable(frequencyTabs, "Speaker Configuration", "Configuration", "Count", "Percentage");
+        createAttributeTable(frequencyTabs, "Power Output", "Power Range", "Count", "Percentage");
+        createAttributeTable(frequencyTabs, "Audio Technology", "Technology", "Count", "Percentage");
+        createAttributeTable(frequencyTabs, "Connectivity", "Connection Type", "Count", "Percentage");
+        createAttributeTable(frequencyTabs, "Product Type", "Type", "Count", "Percentage");
+
+        mainPanel.add(frequencyTabs, BorderLayout.CENTER);
+        return mainPanel;
     }
 
     private void sortFrequencyTable(int sortType) {
@@ -154,13 +164,33 @@ public class AnalysisPanel extends JPanel {
         return panel;
     }
 
-    private void createAttributeTables() {
-        createAttributeTable("Speaker Configuration", "Configuration", "Count", "Percentage");
-        createAttributeTable("Power Output", "Power Range", "Count", "Percentage");
-        createAttributeTable("Audio Technology", "Technology", "Count", "Percentage");
-        createAttributeTable("Connectivity", "Connection Type", "Count", "Percentage");
-        createAttributeTable("Product Type", "Type", "Count", "Percentage");
+    private void createAttributeTable(JTabbedPane parentTab, String tabName, String... columns) {
+        DefaultTableModel model = new DefaultTableModel(columns, 0) {
+            @Override
+            public boolean isCellEditable(int row, int column) {
+                return false;
+            }
+        };
+
+        JTable table = new JTable(model);
+        table.getTableHeader().setReorderingAllowed(false);
+        table.setAutoCreateRowSorter(true);
+
+        // Create scroll pane with some padding
+        JScrollPane scrollPane = new JScrollPane(table);
+        scrollPane.setBorder(BorderFactory.createEmptyBorder(10, 10, 10, 10));
+
+        // Create a panel for the table with padding
+        JPanel panel = new JPanel(new BorderLayout());
+        panel.setBorder(BorderFactory.createEmptyBorder(5, 5, 5, 5));
+        panel.add(scrollPane, BorderLayout.CENTER);
+
+        parentTab.addTab(tabName, panel);
+
+        attributeTables.put(tabName, table);
+        attributeTableModels.put(tabName, model);
     }
+
 
     private void createAttributeTable(String tabName, String... columns) {
         DefaultTableModel model = new DefaultTableModel(columns, 0) {

@@ -9,6 +9,7 @@ import com.google.gson.JsonElement;
 
 import javax.swing.*;
 import javax.swing.Timer;
+import javax.swing.border.TitledBorder;
 import javax.swing.table.DefaultTableModel;
 import javax.swing.table.TableModel;
 import javax.swing.table.TableRowSorter;
@@ -219,8 +220,200 @@ public class SearchPanel extends JPanel {
 
         initializeUI();
         loadProductData();
+
+        // Create main content panel with search results and popular products
+        JPanel contentPanel = new JPanel(new BorderLayout(10, 0));
+
+        // Add search results to center
+        contentPanel.add(new JScrollPane(resultArea), BorderLayout.CENTER);
+
+        // Add popular products to right
+        contentPanel.add(createPopularProductsPanel(), BorderLayout.EAST);
+
+        // Add the content panel
+        add(contentPanel, BorderLayout.CENTER);
+
         addFilterPanel();
         addHistoryPanel();
+    }
+
+    private JPanel createPopularProductsPanel() {
+        JPanel containerPanel = new JPanel(new BorderLayout());
+
+        JPanel popularPanel = new JPanel();
+        popularPanel.setLayout(new BoxLayout(popularPanel, BoxLayout.Y_AXIS));
+        popularPanel.setBorder(BorderFactory.createTitledBorder(
+                BorderFactory.createEtchedBorder(),
+                "Popular Products",
+                TitledBorder.LEFT,
+                TitledBorder.TOP,
+                new Font("Arial", Font.BOLD, 14)
+        ));
+        popularPanel.setBackground(Color.WHITE);
+
+        // Get 5 random products
+        List<Product> randomProducts = getRandomProducts(5);
+
+        for (Product product : randomProducts) {
+            JPanel productCard = createProductCard(product);
+            popularPanel.add(productCard);
+            popularPanel.add(Box.createVerticalStrut(10)); // Add spacing between cards
+        }
+
+        // Wrap in a scroll pane
+        JScrollPane scrollPane = new JScrollPane(popularPanel);
+        scrollPane.setPreferredSize(new Dimension(250, 400));
+        scrollPane.setVerticalScrollBarPolicy(JScrollPane.VERTICAL_SCROLLBAR_AS_NEEDED);
+        scrollPane.setHorizontalScrollBarPolicy(JScrollPane.HORIZONTAL_SCROLLBAR_NEVER);
+
+        // Add scroll pane to container panel
+        containerPanel.add(scrollPane, BorderLayout.CENTER);
+
+        return containerPanel;
+    }
+
+    private JPanel createProductCard(Product product) {
+        JPanel card = new JPanel();
+        card.setLayout(new BoxLayout(card, BoxLayout.Y_AXIS));
+        card.setBorder(BorderFactory.createCompoundBorder(
+                BorderFactory.createLineBorder(new Color(200, 200, 200), 1),
+                BorderFactory.createEmptyBorder(8, 8, 8, 8)
+        ));
+        card.setBackground(new Color(248, 249, 250));
+        card.setMaximumSize(new Dimension(230, 150));
+        card.setAlignmentX(Component.LEFT_ALIGNMENT);
+
+        // Product name
+        JLabel nameLabel = new JLabel(product.getName());
+        nameLabel.setFont(new Font("Arial", Font.BOLD, 12));
+        nameLabel.setAlignmentX(Component.LEFT_ALIGNMENT);
+
+        // Price
+        JLabel priceLabel = new JLabel(String.format("$%.2f", product.getPrice()));
+        priceLabel.setFont(new Font("Arial", Font.BOLD, 14));
+        priceLabel.setForeground(new Color(40, 167, 69));
+        priceLabel.setAlignmentX(Component.LEFT_ALIGNMENT);
+
+        // Category
+        JLabel categoryLabel = new JLabel(product.getCategory());
+        categoryLabel.setFont(new Font("Arial", Font.ITALIC, 11));
+        categoryLabel.setForeground(Color.GRAY);
+        categoryLabel.setAlignmentX(Component.LEFT_ALIGNMENT);
+
+        // Features panel with flow layout
+        JPanel featuresPanel = new JPanel(new FlowLayout(FlowLayout.LEFT));
+        featuresPanel.setBackground(new Color(248, 249, 250));
+        featuresPanel.setAlignmentX(Component.LEFT_ALIGNMENT);
+
+        // Add up to 3 features as small badges
+        int featureCount = 0;
+        for (String feature : product.getFeatures()) {
+            if (featureCount >= 3) break;
+            JLabel featureLabel = createFeatureBadge(feature);
+            featuresPanel.add(featureLabel);
+            featureCount++;
+        }
+
+        // Add components to card
+        card.add(nameLabel);
+        card.add(Box.createVerticalStrut(4));
+        card.add(priceLabel);
+        card.add(Box.createVerticalStrut(2));
+        card.add(categoryLabel);
+        card.add(Box.createVerticalStrut(4));
+        card.add(featuresPanel);
+
+        // Add click listener
+        card.addMouseListener(new MouseAdapter() {
+            @Override
+            public void mouseClicked(MouseEvent e) {
+                displayProductDetails(product);
+            }
+
+            @Override
+            public void mouseEntered(MouseEvent e) {
+                card.setBackground(new Color(240, 240, 240));
+                card.setCursor(new Cursor(Cursor.HAND_CURSOR));
+            }
+
+            @Override
+            public void mouseExited(MouseEvent e) {
+                card.setBackground(new Color(248, 249, 250));
+            }
+        });
+
+        return card;
+    }
+
+    private JLabel createFeatureBadge(String feature) {
+        JLabel badge = new JLabel(feature);
+        badge.setFont(new Font("Arial", Font.PLAIN, 10));
+        badge.setForeground(new Color(0, 123, 255));
+        badge.setBorder(BorderFactory.createCompoundBorder(
+                BorderFactory.createLineBorder(new Color(0, 123, 255), 1),
+                BorderFactory.createEmptyBorder(2, 4, 2, 4)
+        ));
+        badge.setOpaque(true);
+        badge.setBackground(new Color(240, 248, 255));
+        return badge;
+    }
+
+    private List<Product> getRandomProducts(int count) {
+        List<Product> randomProducts = new ArrayList<>();
+        if (products.isEmpty()) return randomProducts;
+
+        // Create a copy of the products list to avoid modifying the original
+        List<Product> availableProducts = new ArrayList<>(products);
+        Random random = new Random();
+
+        // Get random products
+        for (int i = 0; i < count && !availableProducts.isEmpty(); i++) {
+            int randomIndex = random.nextInt(availableProducts.size());
+            randomProducts.add(availableProducts.remove(randomIndex));
+        }
+
+        return randomProducts;
+    }
+
+    private void displayProductDetails(Product product) {
+        JDialog dialog = new JDialog();
+        dialog.setTitle("Product Details");
+        dialog.setModal(true);
+        dialog.setLayout(new BorderLayout(10, 10));
+        dialog.setSize(400, 300);
+        dialog.setLocationRelativeTo(this);
+
+        JPanel detailsPanel = new JPanel();
+        detailsPanel.setLayout(new BoxLayout(detailsPanel, BoxLayout.Y_AXIS));
+        detailsPanel.setBorder(BorderFactory.createEmptyBorder(10, 10, 10, 10));
+
+        // Add product details
+        JLabel nameLabel = new JLabel(product.getName());
+        nameLabel.setFont(new Font("Arial", Font.BOLD, 16));
+        JLabel priceLabel = new JLabel(String.format("Price: $%.2f", product.getPrice()));
+        JLabel categoryLabel = new JLabel("Category: " + product.getCategory());
+
+        detailsPanel.add(nameLabel);
+        detailsPanel.add(Box.createVerticalStrut(10));
+        detailsPanel.add(priceLabel);
+        detailsPanel.add(Box.createVerticalStrut(5));
+        detailsPanel.add(categoryLabel);
+        detailsPanel.add(Box.createVerticalStrut(10));
+
+        // Add features
+        JLabel featuresTitle = new JLabel("Features:");
+        detailsPanel.add(featuresTitle);
+        for (String feature : product.getFeatures()) {
+            detailsPanel.add(new JLabel("• " + feature));
+        }
+
+        // Add close button
+        JButton closeButton = new JButton("Close");
+        closeButton.addActionListener(e -> dialog.dispose());
+
+        dialog.add(detailsPanel, BorderLayout.CENTER);
+        dialog.add(closeButton, BorderLayout.SOUTH);
+        dialog.setVisible(true);
     }
 
     private void addFilterPanel() {

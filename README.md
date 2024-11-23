@@ -169,7 +169,7 @@ This project is licensed under the MIT License - see the LICENSE file for detail
 
 ## Authors
 
-Created by [Rajkumar], [Vansh]
+Created by Rajkumar, Vansh
 
 ## Acknowledgments
 

@@ -12,14 +12,10 @@ import java.util.concurrent.atomic.AtomicBoolean;
 import java.time.Duration;
 
 public class SimpleCrawlerTest {
-    private static final CountDownLatch completionLatch = new CountDownLatch(1);
-    private static final AtomicBoolean crawlingStarted = new AtomicBoolean(false);
     private static final String TARGET_URL = "https://www.bose.ca/en/c/home-theater";
 
     public static void main(String[] args) {
         System.out.println("Starting Crawler Test...\n");
-
-        WebCrawler crawler = null;
 
         try {
             // Basic configuration
@@ -63,7 +59,6 @@ public class SimpleCrawlerTest {
         WebCrawler crawler = new WebCrawler(config);
         CountDownLatch testCompletionLatch = new CountDownLatch(1);
         AtomicBoolean testCrawlingStarted = new AtomicBoolean(false);
-        long startTime = System.currentTimeMillis();
 
         crawler.addObserver(new CrawlerObserver() {
             private int pageCount = 0;

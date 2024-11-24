@@ -3,7 +3,6 @@ package com.searchengine.core.completion;
 import com.google.gson.Gson;
 import com.google.gson.JsonObject;
 import com.google.gson.JsonElement;
-import com.searchengine.core.completion.WordCompletion;
 import com.searchengine.model.Product;
 import java.util.*;
 import java.nio.file.Files;

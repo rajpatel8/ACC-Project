@@ -6,7 +6,6 @@ import java.util.*;
 
 public class PageRanker {
     private final FrequencyAnalyzer frequencyAnalyzer;
-    private final Map<String, Double> productScores;
     private final Map<String, Double> categoryBoosts;
 
     // Ranking weights for different sections
@@ -22,7 +21,6 @@ public class PageRanker {
 
     public PageRanker(FrequencyAnalyzer frequencyAnalyzer) {
         this.frequencyAnalyzer = frequencyAnalyzer;
-        this.productScores = new HashMap<>();
         this.categoryBoosts = new HashMap<>();
         initializeCategoryBoosts();
     }

@@ -49,6 +49,7 @@ public class HTMLParser {
         this.gson = new GsonBuilder().setPrettyPrinting().create();
     }
 
+    @SuppressWarnings("unchecked")
     public void parseHtmlFiles(String htmlDirectory, String outputJsonPath) {
         try {
             Map<String, Map<String, Object>> result = new HashMap<>();
@@ -75,7 +76,6 @@ public class HTMLParser {
                                     companies.put(company, companyData);
                                 }
                                 
-                                @SuppressWarnings("unchecked")
                                 List<Map<String, Object>> existingProducts = 
                                     (List<Map<String, Object>>) companyData.computeIfAbsent("products", k -> new ArrayList<>());
                                 existingProducts.addAll(products);

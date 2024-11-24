@@ -1,4 +1,3 @@
-// File: src/com/searchengine/main/ProductCrawlerTest.java
 package com.searchengine.main;
 
 import com.searchengine.core.crawler.*;

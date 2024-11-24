@@ -2,7 +2,6 @@ package com.searchengine.core.search;
 
 import com.searchengine.core.*;
 import com.searchengine.core.crawler.*;
-import com.searchengine.core.parser.HTMLParser;
 import com.searchengine.core.spell.SpellChecker;
 import com.searchengine.core.completion.WordCompletion;
 import com.searchengine.core.frequency.FrequencyAnalyzer;
@@ -14,8 +13,6 @@ import java.util.*;
 import java.util.concurrent.*;
 
 public class SearchEngine {
-    private final WebCrawler crawler;
-    private final HTMLParser parser;
     private final SpellChecker spellChecker;
     private final WordCompletion wordCompletion;
     private final FrequencyAnalyzer frequencyAnalyzer;
@@ -32,8 +29,6 @@ public class SearchEngine {
         config.setMaxDepth(3);
         config.setMaxPages(100);
 
-        this.crawler = new WebCrawler(config);
-        this.parser = new HTMLParser();
         this.spellChecker = new SpellChecker();
         this.wordCompletion = new WordCompletion();
         this.frequencyAnalyzer = new FrequencyAnalyzer();

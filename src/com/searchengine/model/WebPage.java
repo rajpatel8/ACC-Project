@@ -1,4 +1,3 @@
-// File: src/com/searchengine/model/WebPage.java
 package com.searchengine.model;
 
 import java.util.*;

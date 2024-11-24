@@ -1,4 +1,3 @@
-// File: src/com/searchengine/ui/CrawlerPanel.java
 package com.searchengine.ui;
 
 import com.searchengine.core.cache.PageCache;
@@ -24,8 +23,8 @@ public class CrawlerPanel extends JPanel {
     private JTextArea logArea;
     private JComboBox<String> websiteCombo;
     private JButton startButton;
-    private WebCrawler crawler;
     private JButton stopButton;
+    private WebCrawler crawler;
     private volatile boolean isStopping = false;
 
     public CrawlerPanel() {
@@ -43,12 +42,10 @@ public class CrawlerPanel extends JPanel {
         stopButton.setEnabled(false);
         stopButton.addActionListener(e -> stopCrawling());
 
-        controlPanel.add(startButton);
-        controlPanel.add(stopButton);
-
         controlPanel.add(new JLabel("Select Website:"));
         controlPanel.add(websiteCombo);
         controlPanel.add(startButton);
+        controlPanel.add(stopButton);
 
         // Log Area
         logArea = new JTextArea();
@@ -58,7 +55,6 @@ public class CrawlerPanel extends JPanel {
         add(controlPanel, BorderLayout.NORTH);
         add(scrollPane, BorderLayout.CENTER);
     }
-
 
     private void startCrawling() {
         String url = (String) websiteCombo.getSelectedItem();
@@ -80,15 +76,21 @@ public class CrawlerPanel extends JPanel {
         crawler.addObserver(new CrawlerObserver() {
             @Override
             public void onPageCrawled(WebPage page) {
-                SwingUtilities.invokeLater(() ->
+                SwingUtilities.invokeLater(() -> {
+                    if (!isStopping) {
                         addLog("Crawled: " + page.getUrl() + "\nFound " +
-                                page.getLinks().size() + " links\n"));
+                                page.getLinks().size() + " links\n");
+                    }
+                });
             }
 
             @Override
             public void onCrawlCompleted(CrawlSession session) {
                 SwingUtilities.invokeLater(() -> {
-                    addLog("Crawling completed. Processed " + session.getPagesProcessed() + " pages.");
+                    String message = isStopping ? 
+                        "Crawling stopped. Processed " + session.getPagesProcessed() + " pages." :
+                        "Crawling completed. Processed " + session.getPagesProcessed() + " pages.";
+                    addLog(message);
                     crawlingFinished();
                 });
             }
@@ -102,7 +104,13 @@ public class CrawlerPanel extends JPanel {
 
         new Thread(() -> {
             try {
-                crawler.startCrawling(url);
+                while (!isStopping && crawler.getSession().getPagesProcessed() < config.getMaxPages()) {
+                    crawler.startCrawling(url);
+                    if (isStopping) {
+                        crawler.stopCrawling();
+                        break;
+                    }
+                }
                 SwingUtilities.invokeLater(this::crawlingFinished);
             } catch (Exception e) {
                 SwingUtilities.invokeLater(() -> {
@@ -114,12 +122,21 @@ public class CrawlerPanel extends JPanel {
     }
 
     private void stopCrawling() {
-        isStopping = true;
+        if (crawler != null) {
+            isStopping = true;
+            addLog("Stopping crawler...");
+            crawler.stopCrawling();
+        }
     }
 
     private void crawlingFinished() {
         startButton.setEnabled(true);
         stopButton.setEnabled(false);
+        isStopping = false;
+        if (crawler != null) {
+            crawler.stopCrawling();
+            crawler = null;
+        }
     }
 
     private void addLog(String message) {

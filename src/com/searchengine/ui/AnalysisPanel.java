@@ -191,26 +191,6 @@ public class AnalysisPanel extends JPanel {
         attributeTableModels.put(tabName, model);
     }
 
-
-    private void createAttributeTable(String tabName, String... columns) {
-        DefaultTableModel model = new DefaultTableModel(columns, 0) {
-            @Override
-            public boolean isCellEditable(int row, int column) {
-                return false;
-            }
-        };
-
-        JTable table = new JTable(model);
-        table.getTableHeader().setReorderingAllowed(false);
-        table.setAutoCreateRowSorter(true);
-
-        JScrollPane scrollPane = new JScrollPane(table);
-        tabbedPane.addTab(tabName, scrollPane);
-
-        attributeTables.put(tabName, table);
-        attributeTableModels.put(tabName, model);
-    }
-
     private JPanel createControlPanel() {
         JPanel panel = new JPanel(new FlowLayout(FlowLayout.LEFT));
 
@@ -228,7 +208,7 @@ public class AnalysisPanel extends JPanel {
 
     private void performAnalysis() {
         try {
-            String jsonContent = new String(Files.readAllBytes(Paths.get("audio_products.json")));
+            String jsonContent = new String(Files.readAllBytes(Paths.get("ACC-Project/audio_products.json")));
 
             // Parse and analyze data
             List<Product> products = parseJsonToProducts(jsonContent);
@@ -257,7 +237,7 @@ public class AnalysisPanel extends JPanel {
 
     private void loadAndAnalyzeData() {
         try {
-            String jsonContent = new String(Files.readAllBytes(Paths.get("audio_products.json")));
+            String jsonContent = new String(Files.readAllBytes(Paths.get("ACC-Project/audio_products.json")));
 
             // Parse JSON and create Product objects
             List<Product> products = parseJsonToProducts(jsonContent);

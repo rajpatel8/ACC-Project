@@ -1,16 +1,11 @@
 package com.searchengine.ui;
 
 import com.searchengine.core.search.SearchEngine;
-import com.searchengine.model.Product;
 import javax.swing.*;
 import java.awt.*;
-import java.util.*;
 
 public class MainWindow extends JFrame {
     private final SearchEngine searchEngine;
-    private JTextField searchField;
-    private JTextArea resultArea;
-    private JList<String> suggestionsList;
     private JProgressBar progressBar;
     private JTabbedPane tabbedPane;
     private SearchPanel searchPanel;

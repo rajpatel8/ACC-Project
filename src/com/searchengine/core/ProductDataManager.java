@@ -1,9 +1,6 @@
-// File: src/com/searchengine/core/ProductDataManager.java
 package com.searchengine.core;
 
 import com.searchengine.model.Product;
-import com.searchengine.core.crawler.WebCrawler;
-import com.searchengine.core.parser.HTMLParser;
 
 import java.io.IOException;
 import java.util.*;
@@ -58,16 +55,7 @@ public class ProductDataManager {
         try {
             // Process main page and product pages
             Files.walk(companyDir)
-                    .filter(p -> p.toString().endsWith(".html"))
-                    .forEach(htmlFile -> {
-                        try {
-                            String content = Files.readString(htmlFile);
-//                            List<Product> extracted = HTMLParser.extractProducts(content, company);
-//                            products.addAll(extracted);
-                        } catch (IOException e) {
-                            System.err.println("Error reading file: " + htmlFile);
-                        }
-                    });
+                    .filter(p -> p.toString().endsWith(".html"));
 
             companyProducts.put(company, products);
             System.out.println("Processed " + products.size() + " products for " + company);

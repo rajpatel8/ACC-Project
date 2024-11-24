@@ -92,17 +92,17 @@ type_text "  ✓ Data Validation System" 0.02
 type_text "  ✓ Spell Checking Engine" 0.02
 
 # Team contributions
-echo -e "\n${CYAN}▶ Teammate-3${NC}"
+echo -e "\n${CYAN}▶ MIT${NC}"
 type_text "  ✓ Word Completion System" 0.02
 type_text "  ✓ Frequency Analysis" 0.02
 type_text "  ✓ Search Frequency Tracking" 0.02
 
-echo -e "\n${CYAN}▶ Teammate-4${NC}"
+echo -e "\n${CYAN}▶ BHARGAV${NC}"
 type_text "  ✓ Page Ranking Algorithm" 0.02
 type_text "  ✓ Inverted Indexing" 0.02
 type_text "  ✓ Pattern Recognition" 0.02
 
-echo -e "\n${CYAN}▶ Teammate-5${NC}"
+echo -e "\n${CYAN}▶ KIRTAN${NC}"
 type_text "  ✓ History Management" 0.02
 type_text "  ✓ Statistical Analysis" 0.02
 type_text "  ✓ Popular Products Tracking" 0.02

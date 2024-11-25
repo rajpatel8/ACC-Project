@@ -83,7 +83,7 @@ The Home Theatre System Search and Analysis Engine is a specialized search engin
 RAJKUMAR's Contributions:
 - Web Crawler (WebCrawler.java, CrawlerConfig.java)
 - Caching System (CacheConfig.java, PageCache.java)
-- Search Filters Implementation
+- Search Filters Implementation (SearchEngine.java)
 
 VANSH's Contributions:
 - HTML Parser (HTMLParser.java)
@@ -101,9 +101,9 @@ BHARGAV's Contributions:
 - Pattern Recognition (PatternFinder.java, PatternMatch.java)
 
 KIRTAN's Contributions:
-- History Management System
-- Statistical Analysis Components
-- Popular Products Tracking System
+- History Management System (History part in SearchPanel.java)
+- Statistical Analysis Components (Statistics part in AnalysisPanel.java)
+- Popular Products Tracking System 
 
 # Data Structures and Algorithms Analysis
 

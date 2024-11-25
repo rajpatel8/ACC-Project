@@ -1,8 +1,8 @@
 # Home Theatre System Search and Analysis Engine
 
-## CSCI 927 - Search Engine and Social Media
-### Data Structures and Algorithms Project
-#### Autumn 2024
+## COMP - 8547 - ADVANCE COMPUTING CONCEPTS
+### FALL - 2024
+### GROUP - 9
 
 <img src="UW_Logo_2L_horz.png" alt="Performance Metrics">
 

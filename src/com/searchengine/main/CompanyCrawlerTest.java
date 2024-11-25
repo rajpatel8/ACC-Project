@@ -1,4 +1,3 @@
-// File: src/com/searchengine/main/CompanyCrawlerTest.java
 package com.searchengine.main;
 
 import org.openqa.selenium.*;

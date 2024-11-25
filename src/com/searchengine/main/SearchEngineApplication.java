@@ -1,4 +1,3 @@
-// File: src/com/searchengine/main/SearchEngineApplication.java
 package com.searchengine.main;
 
 import com.searchengine.ui.MainWindow;

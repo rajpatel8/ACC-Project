@@ -1,4 +1,3 @@
-// File: src/com/searchengine/core/crawler/WebCrawler.java
 package com.searchengine.core.crawler;
 
 import com.searchengine.core.cache.PageCache;
@@ -6,7 +5,6 @@ import org.openqa.selenium.*;
 import org.openqa.selenium.chrome.ChromeDriver;
 import org.openqa.selenium.chrome.ChromeOptions;
 import org.openqa.selenium.support.ui.WebDriverWait;
-import org.openqa.selenium.support.ui.ExpectedConditions;
 
 import java.io.IOException;
 import java.nio.charset.StandardCharsets;
@@ -74,7 +72,7 @@ public class WebCrawler {
     }
 
     private WebDriver getOrCreateDriver() {
-        long threadId = Thread.currentThread().getId();
+        long threadId = Thread.currentThread().threadId();
         return drivers.computeIfAbsent(threadId, k -> new ChromeDriver(config.getChromeOptions()));
     }
 
@@ -108,64 +106,6 @@ public class WebCrawler {
             stopCrawling();
         }
     }
-
-    // private void processCrawlRequest(String url) {
-    //     executorService.submit(() -> {
-    //         try {
-                
-    //             if (!isRunning) return;
-    //             WebDriver driver = getOrCreateDriver();
-    //             long startTime = System.currentTimeMillis();
-                
-    //             WebPage page = crawlPage(driver, url);
-                
-    //             if (page != null) {
-    //                 long endTime = System.currentTimeMillis();
-    //                 page.getMetrics().setLoadTime(endTime - startTime);
-                    
-    //                 session.addVisitedUrl(url);
-    //                 session.incrementPagesProcessed();
-    //                 session.getStatistics().incrementSuccessfulPages();
-                    
-    //                 processNewUrls(page.getLinks());
-    //                 notifyObservers(page);
-    //             }
-    //         } catch (Exception e) {
-    //             handleCrawlError(url, e);
-    //         }
-    //     });
-    // }
-
-    // private WebPage crawlPage(WebDriver driver, String url) {
-    //     try {
-    //         WebPage page = new WebPage();
-    //         page.setUrl(url);
-
-    //         // Start page load timing
-    //         long startTime = System.currentTimeMillis();
-            
-    //         // Navigate to page
-    //         driver.get(url);
-            
-    //         // Wait for page load
-    //         WebDriverWait wait = new WebDriverWait(driver, Duration.ofSeconds(config.getPageLoadTimeout()));
-    //         wait.until(webDriver -> ((JavascriptExecutor) webDriver)
-    //             .executeScript("return document.readyState")
-    //             .equals("complete"));
-
-    //         // Extract page information
-    //         extractPageInformation(driver, page);
-            
-    //         // Calculate load time
-    //         long endTime = System.currentTimeMillis();
-    //         page.getMetrics().setLoadTime(endTime - startTime);
-
-    //         return page;
-    //     } catch (Exception e) {
-    //         handleCrawlError(url, e);
-    //         return null;
-    //     }
-    // }
 
     private void extractPageInformation(WebDriver driver, WebPage page) {
         try {

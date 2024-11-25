@@ -37,7 +37,6 @@ public class SearchPanel extends JPanel {
     private JList<SearchHistoryEntry> historyList;
     private DefaultListModel<SearchHistoryEntry> historyModel;
     private Map<String, SearchHistoryEntry> searchHistory; // Changed to Map for quick lookup
-    private JPanel frequencyPanel;
     private DefaultTableModel frequencyModel;
     private JTable frequencyTable;
 
@@ -750,7 +749,7 @@ public class SearchPanel extends JPanel {
     private void loadProductData() {
         try {
             // Read the JSON file
-            String jsonContent = new String(Files.readAllBytes(Paths.get("audio_products.json")));
+            String jsonContent = new String(Files.readAllBytes(Paths.get("ACC-Project\\audio_products.json")));
 
             // Parse JSON
             Gson gson = new Gson();

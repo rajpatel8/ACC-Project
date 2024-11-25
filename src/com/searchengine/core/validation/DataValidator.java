@@ -6,11 +6,9 @@ import java.util.regex.Pattern;
 
 public class DataValidator {
     private final Map<String, Pattern> patterns;
-    private final ValidationRules rules;
 
     public DataValidator() {
         this.patterns = ValidationPatterns.getDefaultPatterns();
-        this.rules = new ValidationRules();
     }
 
     public ValidationResult validateProduct(Product product) {

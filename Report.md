@@ -93,7 +93,7 @@ VANSH's Contributions:
 MIT's Contributions:
 - Word Completion System (WordCompletion.java, TrieNode.java)
 - Frequency Analysis (FrequencyAnalyzer.java)
-- Search Frequency Tracking
+- Search Frequency Tracking (SearchPanel.java)
 
 BHARGAV's Contributions:
 - Page Ranking Algorithm (PageRanker.java)
@@ -103,7 +103,7 @@ BHARGAV's Contributions:
 KIRTAN's Contributions:
 - History Management System (History part in SearchPanel.java)
 - Statistical Analysis Components (Statistics part in AnalysisPanel.java)
-- Popular Products Tracking System 
+- Popular Products Tracking System (SearchPanel.java)
 
 # Data Structures and Algorithms Analysis
 
